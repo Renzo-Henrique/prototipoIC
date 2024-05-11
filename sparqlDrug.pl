@@ -4,8 +4,8 @@
 
 
 % Predicado que executa uma query de entrada.
-executeSparqlQuery(Resultado, Query) :-
-    sparql_query(   Query,
+executeSparqlQuery(QueryString, Resultado) :-
+    sparql_query(   QueryString,
                     Resultado,
                     [host('drugbank.bio2rdf.org'), path('/sparql/'), cert_verify_hook(cert_accept_any)]
     ).
@@ -13,75 +13,94 @@ executeSparqlQuery(Resultado, Query) :-
 
 %------------------------------
 %------------------------------
-% Resultados com callback -> Melhora na modularização
+% Resultadoados com callback -> Melhora na modularização
 
 %------------------------------
 % With callback for modularization
-rowResult(Result, QueryPredicate):-
-    call(QueryPredicate, Query),
-    executeSparqlQuery(Result, Query).
+rowResultado(QueryPredicado, Resultado):-
+    call(QueryPredicado, QueryString),
+    executeSparqlQuery(QueryString, Resultado).
 
 %------------------------------
-% Result with predicates with arity = 2
-resultSeparated(A,B, QueryPredicate):-
-    rowResult(Result, QueryPredicate),
-    Result = row(A, B).
+% Resultado predicados com argumentos = 2
+resultadoSeparado(QueryPredicado, A, B):-
+    rowResultado(QueryPredicado, Resultado),
+    Resultado = row(A, B).
 
-% Result with predicates with arity = 3
-resultSeparated(A,B,C, QueryPredicate):-
-    rowResult(Result, QueryPredicate),
-    Result = row(A, B, C).
+% Resultado predicados com argumentos = 3
+resultadoSeparado(QueryPredicado, A,B,C):-
+    rowResultado(QueryPredicado, Resultado),
+    Resultado = row(A, B, C).
 
 %------------------------------
-% Result values without any kind of type with predicates with arity = 2
-resultSeparatedValues(A,B, QueryPredicate):-
-    rowResult(Result, QueryPredicate),
-    Result = row(Index1, Index2),
+% Resultado no formato string com argumentos = 2
+resultadoValoresSeparados(QueryPredicado, A,B):-
+    rowResultado(QueryPredicado,Resultado),
+    Resultado = row(Index1, Index2),
     extractValueFromRowElement(Index1, A),
     extractValueFromRowElement(Index2, B).
 
-% Result values without any kind of type with predicates with arity = 3
-resultSeparatedValues(A,B,C, QueryPredicate):-
-    rowResult(Result, QueryPredicate),
-    Result = row(Index1, Index2, Index3),
-    extractValueFromRowElement(Index1, A),
-    extractValueFromRowElement(Index2, B),
-    extractValueFromRowElement(Index3, C).
+% Resultado no formato string com argumentos = 3
+resultadoValoresSeparados(QueryPredicado, A,B,C):-
+    rowResultado(QueryPredicado, Resultado),
+    Resultado = row(Valor1, Valor2, Valor3),
+    extractValueFromRowElement(Valor1, A),
+    extractValueFromRowElement(Valor2, B),
+    extractValueFromRowElement(Valor3, C).
 
-% Result in a list
-resultListed(List, QueryPredicate):-
-    rowResult(Row, QueryPredicate),
-    applyToRow(Row, List).
+% Resultado in a lista
+resultadoListado(QueryPredicado, Lista):-
+    rowResultado(QueryPredicado, Row),
+    applyToRow(Row, Lista).
 
-% Resultado filtrado por uma chave e onde 
-% ela se encontra na lista que é resultado da query
-filter(Key, Index, List, QueryPredicate):-
-    resultListed(List, QueryPredicate),
-    nth0(Index, List, Target, _),
-    Key == Target.
+% Resultadoado filtrado por uma chave e onde 
+% ela se encontra na listaa que é resultado da query
+filtro(QueryPredicado, Chave, Index, Lista):-
+    resultadoListado(QueryPredicado, Lista),
+    nth0(Index, Lista, Objetivo, _),
+    Chave == Objetivo.
 
-/** callback examples
- * 
-?- rowResult(Result, queryDrugInformation).
-?- resultSeparated(DrugIdentifier, ActivePrinciple, Indication, queryDrugInformation).
-?- resultSeparatedValues(DrugIdentifier, ActivePrinciple, Indication, queryDrugInformation).
-?- filter('DB00001', 0, List, queryDrugInformation).
+/*
+*   Exemplos de queries conhecidas com respectivas informações
+*
+queryDrugInformation            ,DrugIdentifier, ActivePrinciple, Indication
 
-?- rowResult(Result, queryDrugCategory).
-?- resultSeparated(DrugIdentifier, DrugCategory, queryDrugCategory).
-?- resultSeparatedValues(DrugIdentifier, DrugCategory, queryDrugCategory).
-?- filter('DB00001', 0, List, queryDrugCategory).
+queryInteraction                ,DrugIdentifier, InteractionIDs, Description
 
-?- rowResult(Result, queryDrugClassification).
-?- resultSeparated(DrugIdentifier, DrugClassification, queryDrugClassification).
+queryFoodInteraction            ,DrugIdentifier, FoodInteraction
 
-?- rowResult(Result, queryFoodInteraction).
-?- resultSeparated(DrugIdentifier, FoodInteraction, queryFoodInteraction).
+queryDrugCategory               ,DrugIdentifier, DrugCategory
 
-?- rowResult(Result, queryInteraction).
-?- resultSeparated(DrugIdentifier, InteractionIDs, Description, queryInteraction).
+queryDrugClassification         ,DrugIdentifier, DrugClassification
 
-?- rowResult(Result, queryProduct).
-?- resultSeparated(DrugIdentifier, ProductName, ProductIdentifier, queryProduct).
+queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
+
+*/
+
+
+
+/** <examples>
+
+?- filtro(queryDrugCategory, 'DB00001', 0, List).
+
+?- resultadoValoresSeparados(queryFoodInteraction, DrugIdentifier, FoodInteraction).
+?- resultadoValoresSeparados(queryInteraction, DrugIdentifier, InteractionIDs, Description).
+
+?- resultadoSeparado(queryFoodInteraction, DrugIdentifier, FoodInteraction).
+?- resultadoSeparado(queryInteraction,DrugIdentifier, InteractionIDs, Description).
+
+?- resultadoListado(queryDrugInformation, Lista)
+*/
+
+
+/*
+TODO: perguntas
+
+?- filtro(queryDrugCategory, 'DB00001', 0, List).
+List = ['DB00001', 'Antithrombins'] ;
+List = ['DB00001', 'Fibrinolytic Agents'] ;
+false.
+
+Isso deve ser consertado? Não retornar falso quando não achar mais resultados
 
 */
