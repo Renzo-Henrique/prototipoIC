@@ -1,7 +1,7 @@
 :- use_module('modules/sparql_client.pl').
 :- use_module('modules/queries.pl').
 :- use_module('modules/rowFunctions.pl').
-
+:- debug.
 
 % Predicado que executa uma query de entrada.
 executeSparqlQuery(QueryString, Resultado) :-
@@ -52,10 +52,16 @@ resultadoListado(QueryPredicado, Lista):-
 
 % Resultadoado filtrado por uma chave e onde 
 % ela se encontra na listaa que é resultado da query
-filtro(QueryPredicado, Chave, Index, Lista):-
+filtroResultado(QueryPredicado, Chave, Index, Lista):-
     resultadoListado(QueryPredicado, Lista),
     nth0(Index, Lista, Objetivo, _),
     Chave == Objetivo.
+
+% filtroQuery(queryInteraction, " CONTAINS(?drugIdentifier, 'DB00026') ", Lista).
+filtroQuery(QueryPredicado, Condicao, Lista):-
+    callBackFilterQuery(QueryPredicado, ResultadoQuery, Condicao),
+    executeSparqlQuery(ResultadoQuery, Lista).
+
 
 /*
 *   Exemplos de queries conhecidas com respectivas informações
@@ -90,6 +96,8 @@ queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
 ?- resultadoListado(queryFoodInteraction, Lista).
 ?- resultadoListado(queryInteraction, Lista).
 ?- resultadoListado(queryProduct, Lista).
+
+?- filtroQuery(queryInteraction, ' CONTAINS(?drugIdentifier, "DB00001")', Lista).
 */
 
 
