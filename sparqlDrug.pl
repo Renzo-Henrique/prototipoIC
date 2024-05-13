@@ -11,12 +11,19 @@ executeSparqlQuery(QueryString, Resultado) :-
     ).
 
 
+
 %------------------------------
-%------------------------------
-% Resultados com callback -> Melhora na modularização
+% Resultado da query
 rowResultado(QueryPredicado, Resultado):-
     call(QueryPredicado, QueryString),
     executeSparqlQuery(QueryString, Resultado).
+
+%------------------------------
+% Resultado com filtragem DENTRO da query
+rowfiltroQuery(QueryPredicado, Condicao, Lista):-
+    call(QueryPredicado, StringQuery),
+    includeFilterQuery(StringQuery, ResultadoQuery, Condicao),
+    executeSparqlQuery(ResultadoQuery, Lista).
 
 %------------------------------
 % Resultado predicados com argumentos = 2
@@ -24,6 +31,7 @@ resultadoSeparado(QueryPredicado, A, B):-
     rowResultado(QueryPredicado, Resultado),
     Resultado = row(A, B).
 
+%------------------------------
 % Resultado predicados com argumentos = 3
 resultadoSeparado(QueryPredicado, A,B,C):-
     rowResultado(QueryPredicado, Resultado),
@@ -37,6 +45,7 @@ resultadoValoresSeparados(QueryPredicado, A,B):-
     extractValueFromRowElement(Index1, A),
     extractValueFromRowElement(Index2, B).
 
+%------------------------------
 % Resultado no formato string com argumentos = 3
 resultadoValoresSeparados(QueryPredicado, A,B,C):-
     rowResultado(QueryPredicado, Resultado),
@@ -45,40 +54,25 @@ resultadoValoresSeparados(QueryPredicado, A,B,C):-
     extractValueFromRowElement(Valor2, B),
     extractValueFromRowElement(Valor3, C).
 
-% Resultado in a lista
+%------------------------------
+% Resultado em lista
 resultadoListado(QueryPredicado, Lista):-
     rowResultado(QueryPredicado, Row),
     applyToRow(Row, Lista).
 
-% Resultadoado filtrado por uma chave e onde 
-% ela se encontra na listaa que é resultado da query
+%------------------------------
+% Resultado em lista com condicao
+resultadoListado(QueryPredicado, Condicao, Lista):-
+    rowfiltroQuery(QueryPredicado, Condicao, Resultado),
+    applyToRow(Resultado, Lista).
+
+%------------------------------
+% Resultado filtrado por uma chave e onde 
+% ela se encontra na lista que é resultado da query
 filtroResultado(QueryPredicado, Chave, Index, Lista):-
     resultadoListado(QueryPredicado, Lista),
     nth0(Index, Lista, Objetivo, _),
     Chave == Objetivo.
-
-% filtroQuery(queryInteraction, " CONTAINS(?drugIdentifier, 'DB00026') ", Lista).
-filtroQuery(QueryPredicado, Condicao, Lista):-
-    callBackFilterQuery(QueryPredicado, ResultadoQuery, Condicao),
-    executeSparqlQuery(ResultadoQuery, Lista).
-
-
-/*
-*   Exemplos de queries conhecidas com respectivas informações
-*
-queryDrugCategory               ,DrugIdentifier, DrugCategory
-
-queryDrugClassification         ,DrugIdentifier, DrugClassification
-
-queryDrugInformation            ,DrugIdentifier, ActivePrinciple, Indication
-
-queryFoodInteraction            ,DrugIdentifier, FoodInteraction
-
-queryInteraction                ,DrugIdentifier, InteractionIDs, Description
-
-queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
-
-*/
 
 /** <examples>
 
@@ -97,18 +91,5 @@ queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
 ?- resultadoListado(queryInteraction, Lista).
 ?- resultadoListado(queryProduct, Lista).
 
-?- filtroQuery(queryInteraction, ' CONTAINS(?drugIdentifier, "DB00001")', Lista).
-*/
-
-
-/*
-TODO: perguntas
-
-?- filtro(queryDrugCategory, 'DB00001', 0, List).
-List = ['DB00001', 'Antithrombins'] ;
-List = ['DB00001', 'Fibrinolytic Agents'] ;
-false.
-
-Isso deve ser consertado? Não retornar falso quando não achar mais resultados
-
+?- filtroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Lista).
 */

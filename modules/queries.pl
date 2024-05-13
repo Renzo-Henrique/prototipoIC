@@ -1,6 +1,6 @@
 %% Definition of predicates with corresponding query for modularization purposes.
 
-:- module(queries,   [  callBackFilterQuery/3,
+:- module(queries,   [  includeFilterQuery/3,
                         queryDrugCategory/1, queryDrugClassification/1,
                         queryDrugInformation/1, queryFoodInteraction/1,
                         queryInteraction/1, queryProduct/1]).
@@ -75,7 +75,7 @@ queryInteraction(Query):-
         
         ?interactionLink dcterms:title ?interactionDescription;
                 biovoc:identifier ?interactionIDs.
-        
+        {}
         } ORDER BY ?drugIdentifier LIMIT 1000".
 
 queryProduct(Query):- 
@@ -95,18 +95,43 @@ queryProduct(Query):-
         
         } ORDER BY ?drugIdentifier LIMIT 1000".
 
-% callBackFilterQuery(queryInteraction, " CONTAINS(?drugIdentifier, 'DB00026') ", QueryResulted).
-callBackFilterQuery(QueryPredicate, Condition, QueryResulted):-
-        call(QueryPredicate, StringQuery),
-        includeFilterQuery(StringQuery, QueryResulted, Condition).
-
-
 includeFilterQuery(Query, QueryResulted, Condition):-
-        removeAfterCharacter(Query, "}", Removed),
+        removeAfterLastCharacter(Query, "}", Removed),
         includeFilter(Condition, FilterString),
         finalOfStringQuery(FinalStr),
         string_concat(Removed, FilterString, R1),
         string_concat(R1, FinalStr, QueryResulted), !.
+
+
+
+lastOccurrence([], _, Index, Index) :- !.
+lastOccurrence([H|T], Character, Index, Position) :-
+    (H == Character ->
+        NewIndex is Index + 1,
+        lastOccurrence(T, Character, NewIndex, NewPosition),
+        Position is NewPosition
+    ;
+        NewIndex is Index + 1,
+        lastOccurrence(T, Character, NewIndex, Position)
+    ).
+
+/*lastOcurrence([], _, _,_).
+lastOccurrence([H|T], Character, I, Position) :-
+        ( (H == Character, write(H), Position = I); true),
+        lastOccurrence(T, Character, I+1, Position).*/
+
+% string_chars("Olá {} sou } ponto", Chars).
+% lastOccurrenceRecursive("Olá {} sou } ponto", '}', Result).
+lastOccurrenceRecursive(String, Character, Position) :-
+        string_chars(String, Chars), % Convert string to list of characters
+        lastOccurrence(Chars, Character, 0 , Position).
+    
+
+% incluir erro ao não achar caractere ( LastOcurrence = -1)
+removeAfterLastCharacter(String, Character, Result) :-
+        lastOccurrenceRecursive(String, Character, LastOcurrence),
+        sub_string(String, 0, LastOcurrence, _, Result). % Extrair a substring antes do último caractere
+            
 
 removeAfterCharacter(String, Character, Result) :-
         sub_atom(String, Before, _, _, Character), % Find the position of the character
@@ -121,17 +146,24 @@ finalOfStringQuery(Str):-
 % includeFilter(" CONTAINS(?drugIdentifier, 'DB00026') ", Filter).
 % includeFilterQuery(" CONTAINS(?drugIdentifier, 'DB00026') ",Filter).
 includeFilter(Condition, Filter) :-
-        (   nonvar(Condition)
-        ->  string_concat(" FILTER(", Condition, Temp),
-        string_concat(Temp, ")\n", Filter)
-        ;   % Condition is not instantiated
-        throw(error(instantiation_error, includeFilter/2))
-        ).
+        string_concat(" FILTER(", Condition, Temp),
+        string_concat(Temp, ")\n", Filter).
 
 % ?- filtroQuery(queryInteraction, , Lista).
 
-% callBackFilterQuery(queryInteraction, ' CONTAINS(?interactionIDs, "DB00005")', QueryResulted).
+% includeFilterQuery(queryInteraction, ' CONTAINS(?interactionIDs, "DB00005")', QueryResulted).
 
 % filtroQuery(queryInteraction, " CONTAINS(?interactionIDs, \"DB00005\")", Lista).
+
+% removeAfterLastCharacter("Olá {} sou } ponto", '}', Result).
+
+% Base case: Reversing an empty list results in an empty list
+reverse_iterate([], []).
+
+% Recursive case: Reversing a non-empty list is appending the last element to the reversed rest of the list
+reverse_iterate([Head|Tail], Reversed) :-
+    reverse_iterate(Tail, ReversedTail),  % Recursively reverse the tail of the list
+    append(ReversedTail, [Head], Reversed).  % Append the head to the reversed tail
+
 
 
