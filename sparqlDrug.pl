@@ -13,10 +13,7 @@ executeSparqlQuery(QueryString, Resultado) :-
 
 %------------------------------
 %------------------------------
-% Resultadoados com callback -> Melhora na modularização
-
-%------------------------------
-% With callback for modularization
+% Resultados com callback -> Melhora na modularização
 rowResultado(QueryPredicado, Resultado):-
     call(QueryPredicado, QueryString),
     executeSparqlQuery(QueryString, Resultado).
@@ -63,21 +60,19 @@ filtro(QueryPredicado, Chave, Index, Lista):-
 /*
 *   Exemplos de queries conhecidas com respectivas informações
 *
-queryDrugInformation            ,DrugIdentifier, ActivePrinciple, Indication
-
-queryInteraction                ,DrugIdentifier, InteractionIDs, Description
-
-queryFoodInteraction            ,DrugIdentifier, FoodInteraction
-
 queryDrugCategory               ,DrugIdentifier, DrugCategory
 
 queryDrugClassification         ,DrugIdentifier, DrugClassification
 
+queryDrugInformation            ,DrugIdentifier, ActivePrinciple, Indication
+
+queryFoodInteraction            ,DrugIdentifier, FoodInteraction
+
+queryInteraction                ,DrugIdentifier, InteractionIDs, Description
+
 queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
 
 */
-
-
 
 /** <examples>
 
@@ -89,7 +84,12 @@ queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
 ?- resultadoSeparado(queryFoodInteraction, DrugIdentifier, FoodInteraction).
 ?- resultadoSeparado(queryInteraction,DrugIdentifier, InteractionIDs, Description).
 
-?- resultadoListado(queryDrugInformation, Lista)
+?- resultadoListado(queryDrugCategory, Lista).
+?- resultadoListado(queryDrugClassification, Lista).
+?- resultadoListado(queryDrugInformation, Lista).
+?- resultadoListado(queryFoodInteraction, Lista).
+?- resultadoListado(queryInteraction, Lista).
+?- resultadoListado(queryProduct, Lista).
 */
 
 
