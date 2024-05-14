@@ -95,75 +95,53 @@ queryProduct(Query):-
         
         } ORDER BY ?drugIdentifier LIMIT 1000".
 
+% Predicate to include a condition to filter in a query
+% Condition must be able match the argument Query
+% example: ' CONTAINS(?interactionIDs, "DB00005")' for Query in queryInteraction
+% example: ' CONTAINS(?drugIdentifier, "DB00001")' for all the queries made.
 includeFilterQuery(Query, QueryResulted, Condition):-
-        removeAfterLastCharacter(Query, "}", Removed),
+        removeAfterLastCharacter(Query, '}', Removed),
         includeFilter(Condition, FilterString),
         finalOfStringQuery(FinalStr),
         string_concat(Removed, FilterString, R1),
         string_concat(R1, FinalStr, QueryResulted), !.
 
+% Base case: If the element is found at the head of the list, return 0.
+occurrenceIndex([Element|_], Element, 0).
 
+% Recursive case: If the element is not found at the head, search in the rest of the list.
+occurrenceIndex([_|Tail], Element, Index) :-
+        occurrenceIndex(Tail, Element, PreviousIndex),
+        Index is PreviousIndex + 1.
 
-lastOccurrence([], _, Index, Index) :- !.
-lastOccurrence([H|T], Character, Index, Position) :-
-    (H == Character ->
-        NewIndex is Index + 1,
-        lastOccurrence(T, Character, NewIndex, NewPosition),
-        Position is NewPosition
-    ;
-        NewIndex is Index + 1,
-        lastOccurrence(T, Character, NewIndex, Position)
-    ).
-
-/*lastOcurrence([], _, _,_).
-lastOccurrence([H|T], Character, I, Position) :-
-        ( (H == Character, write(H), Position = I); true),
-        lastOccurrence(T, Character, I+1, Position).*/
-
-% string_chars("Olá {} sou } ponto", Chars).
-% lastOccurrenceRecursive("Olá {} sou } ponto", '}', Result).
+% Predicate to find the last ocurrence of 'Character'.
 lastOccurrenceRecursive(String, Character, Position) :-
         string_chars(String, Chars), % Convert string to list of characters
-        lastOccurrence(Chars, Character, 0 , Position).
+        findall(Index, occurrenceIndex(Chars, Character, Index), Positions), % Find all occurrences of the character
+        max_list(Positions, Position), % Select the maximum position
+        Position >= 0. % Ensure Position is non-negative
     
 
-% incluir erro ao não achar caractere ( LastOcurrence = -1)
+% Remove the substring after the last ocurrence of 'Character' of a 'String'
 removeAfterLastCharacter(String, Character, Result) :-
         lastOccurrenceRecursive(String, Character, LastOcurrence),
         sub_string(String, 0, LastOcurrence, _, Result). % Extrair a substring antes do último caractere
             
 
+% Remove the substring after the first ocurrence of 'Character' of a 'String'
 removeAfterCharacter(String, Character, Result) :-
         sub_atom(String, Before, _, _, Character), % Find the position of the character
         sub_atom(String, 0, Before, _, Result), !. % Extract the substring before the character
 
-/*concatQuery(Query, Str, QueryResulted):-
-        string_concat([Query, Str], QueryResulted).*/
 
+% String normally found in the last characters of Queries
 finalOfStringQuery(Str):-
         Str = "} ORDER BY ?drugIdentifier".
 
-% includeFilter(" CONTAINS(?drugIdentifier, 'DB00026') ", Filter).
-% includeFilterQuery(" CONTAINS(?drugIdentifier, 'DB00026') ",Filter).
+% Put the condition in the Filter sintax of sparql
 includeFilter(Condition, Filter) :-
         string_concat(" FILTER(", Condition, Temp),
         string_concat(Temp, ")\n", Filter).
-
-% ?- filtroQuery(queryInteraction, , Lista).
-
-% includeFilterQuery(queryInteraction, ' CONTAINS(?interactionIDs, "DB00005")', QueryResulted).
-
-% filtroQuery(queryInteraction, " CONTAINS(?interactionIDs, \"DB00005\")", Lista).
-
-% removeAfterLastCharacter("Olá {} sou } ponto", '}', Result).
-
-% Base case: Reversing an empty list results in an empty list
-reverse_iterate([], []).
-
-% Recursive case: Reversing a non-empty list is appending the last element to the reversed rest of the list
-reverse_iterate([Head|Tail], Reversed) :-
-    reverse_iterate(Tail, ReversedTail),  % Recursively reverse the tail of the list
-    append(ReversedTail, [Head], Reversed).  % Append the head to the reversed tail
 
 
 

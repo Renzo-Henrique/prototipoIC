@@ -91,5 +91,6 @@ filtroResultado(QueryPredicado, Chave, Index, Lista):-
 ?- resultadoListado(queryInteraction, Lista).
 ?- resultadoListado(queryProduct, Lista).
 
-?- filtroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Lista).
+?- rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Resultado).
+?- resultadoListado(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Lista).
 */
