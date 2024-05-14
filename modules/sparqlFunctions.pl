@@ -1,7 +1,15 @@
-:- use_module('modules/sparql_client.pl').
+:- module(sparqlFunctions,   [  rowResultado/2, rowfiltroQuery/3,
+                        resultadoSeparado/3, resultadoSeparado/4,
+                        resultadoValoresSeparados/3, resultadoValoresSeparados/4,
+                        resultadoListado/2, resultadoListado/3,
+                        filtroResultado/4]).
+
+/*:- use_module('modules/sparql_client.pl').
 :- use_module('modules/queries.pl').
-:- use_module('modules/rowFunctions.pl').
-:- debug.
+:- use_module('modules/rowFunctions.pl').*/
+:- use_module('sparql_client.pl').
+:- use_module('queries.pl').
+:- use_module('rowFunctions.pl').
 
 % Predicado que executa uma query de entrada.
 executeSparqlQuery(QueryString, Resultado) :-

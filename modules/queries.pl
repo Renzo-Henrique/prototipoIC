@@ -1,6 +1,6 @@
 %% Definition of predicates with corresponding query for modularization purposes.
 
-:- module(queries,   [  includeFilterQuery/3,
+:- module(queries,   [  includeFilterQuery/3, includeConditionSubstring/3,
                         queryDrugCategory/1, queryDrugClassification/1,
                         queryDrugInformation/1, queryFoodInteraction/1,
                         queryInteraction/1, queryProduct/1]).
@@ -143,5 +143,13 @@ includeFilter(Condition, Filter) :-
         string_concat(" FILTER(", Condition, Temp),
         string_concat(Temp, ")\n", Filter).
 
+includeConditionSubstring(Key, Value, Condition):-
+        string_concat(" CONTAINS(", Key, Temp1),
+        string_concat(Temp1, ", \'", Temp2),
+        string_concat(Temp2, Value, Temp3),
+        string_concat(Temp3, "\') ", Condition).
 
 
+% " CONTAINS(?interactionIDs, '\'DB00026\'') "
+
+% includeConditionSubstring("?interactionIDs", 'DB00026', Condition).
