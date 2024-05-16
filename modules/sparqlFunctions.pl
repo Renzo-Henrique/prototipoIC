@@ -8,10 +8,16 @@
 /**
  * executeSparqlQuery(+QueryString, -Resultado)
  *
- * Predicado que executa uma query de entrada em formato de string e retorna o resultado.
+ * Predicado que realiza uma consulta SPARQL especificada por `QueryString`, uma String, e retorna o resultado na variável `Resultado`.
  *
  * @param QueryString String contendo a consulta SPARQL a ser executada.
  * @param Resultado Variável que será unificada com o resultado da consulta.
+ *
+ * @note Lembre-se de que a consulta SPARQL deve ser válida para que este predicado retorne um resultado útil.
+ * @note Olhe queries.pl em caso de dúvida em queries
+ * 
+ * @formato O resultado é uma estrutura complexa contendo informações obtidas pela consulta SPARQL. Resultado = row(A,B,C, ...) 
+ * sendo cada elemento no formato literal(compound(Type, Value))
  */
 executeSparqlQuery(QueryString, Resultado) :-
     sparql_query(   QueryString,
@@ -21,26 +27,69 @@ executeSparqlQuery(QueryString, Resultado) :-
 
 
 
-%------------------------------
-% Resultado da query
+/**
+ * rowResultado(+QueryPredicado, -Resultado)
+ *
+ * Predicado que realiza uma consulta SPARQL especificada por `QueryPredicado`, um predicado, e retorna o resultado na variável `Resultado`.
+ *
+ * @param QueryPredicado Predicado que representa a consulta SPARQL a ser executada.
+ * @param Resultado Variável que será unificada com o resultado da consulta SPARQL.
+ * @note Olhe queries.pl em caso de dúvida em queries
+ * 
+ * @formato O resultado é uma estrutura complexa contendo informações obtidas pela consulta SPARQL. Resultado = row(A,B,C, ...) 
+ * sendo cada elemento no formato literal(compound(Type, Value)) 
+ */
 rowResultado(QueryPredicado, Resultado):-
     call(QueryPredicado, QueryString),
     executeSparqlQuery(QueryString, Resultado).
 
-%------------------------------
-% Resultado com filtragem DENTRO da query
+/**
+ * rowfiltroQuery(+QueryPredicado, +Condicao, -Resultado)
+ *
+ * Predicado que realiza uma consulta SPARQL especificada por `QueryPredicado`, um predicado, incluindo uma `Condicao` para filtragem DENTRO da query ]
+ * e retorna o resultado na variável `Resultado`.
+ * 
+ *
+ * @param QueryPredicado Predicado que representa a consulta SPARQL a ser executada.
+ * @param Condição Variável que será unificada com o resultado da consulta SPARQL.
+ * @param Resultado Variável que será unificada com o resultado da consulta SPARQL.
+ *
+ * 
+ * @example  Condicao = 'CONTAINS(?productNameA,\"Angiomax 250 mg vial\")'
+ * @example  Condicao = 'CONTAINS(?drugIdentifier,\"DB00006\")'
+ * @example  rowfiltroQuery(queryDrugInformation, 'CONTAINS(?drugIdentifier,\"DB00006\")', Resultado)
+ * 
+ * 
+ * @formato O resultado é uma estrutura complexa contendo informações obtidas pela consulta SPARQL. Resultado = row(A,B,C, ...) 
+ * sendo cada elemento no formato literal(compound(Type, Value))
+ */
 rowfiltroQuery(QueryPredicado, Condicao, Resultado):-
     call(QueryPredicado, StringQuery),
     includeFilterQuery(StringQuery, ResultadoQuery, Condicao),
     executeSparqlQuery(ResultadoQuery, Resultado).
 
-%------------------------------
-% Resultado com filtragem FORA da query
-% Chave é o valor a ser encontrado
-% Index é onde ele se encontra na lista que é resultado da query
-resultadoFiltro(QueryPredicado, Chave, Index, Lista):-
+/**
+ * resultadoFiltro(+QueryPredicado, +Chave, +Indice, -Lista)
+ *
+ * Predicado que realiza uma consulta SPARQL especificada por `QueryPredicado`, um predicado, incluindo uma `Condicao` para filtragem DENTRO da query ]
+ * e retorna o resultado na variável `Resultado`.
+ * 
+ *
+ * @param QueryPredicado Predicado que representa a consulta SPARQL a ser executada.
+ * @param Chave é o valor a ser filtrado
+ * @param Indice é o índice em que a chave se encontra no resultado de uma query.
+ * @param Resultado Variável que será unificada com o resultado da consulta SPARQL.
+ * 
+ * @note Para saber qual o índice a ser usado em uma chave verifique as variáveis de consulta da query em sparql, exemplo, '?drugIdentifier'
+ * 
+ * @example  resultadoFiltro(queryDrugInformation, "DB00006", 0, Lista)
+ * 
+ * @formato O resultado é uma estrutura complexa contendo informações obtidas pela consulta SPARQL. Resultado = row(A,B,C, ...) 
+ * sendo cada elemento no formato literal(compound(Type, Value))
+ */
+resultadoFiltro(QueryPredicado, Chave, Indice, Lista):-
     resultadoListado(QueryPredicado, Lista),
-    nth0(Index, Lista, Objetivo, _),
+    nth0(Indice, Lista, Objetivo, _),
     Chave == Objetivo.
 
 /**
@@ -51,7 +100,8 @@ resultadoFiltro(QueryPredicado, Chave, Index, Lista):-
  *
  * @example 
  *   ?- resultadoListado(queryProduct, [DrugIdentifier, ProductName, ProductIdentifier]).
- *
+ *   ?- resultadoListado(queryProduct, Lista).
+ * @formato Lista é uma lista contendo cada valor resultante da query
 */
 resultadoListado(QueryPredicado, Lista):-
     rowResultado(QueryPredicado, Row),
@@ -94,7 +144,5 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
 ?- resultadoListado(queryProduct, Lista).
 
 ?- rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Resultado).
-?- resultadoListado(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Lista).
-
 ?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00945', Lista).
 */
