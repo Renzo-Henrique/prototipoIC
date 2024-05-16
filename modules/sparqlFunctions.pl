@@ -65,7 +65,7 @@ rowResultado(QueryPredicado, Resultado):-
  */
 rowfiltroQuery(QueryPredicado, Condicao, Resultado):-
     call(QueryPredicado, StringQuery),
-    includeFilterQuery(StringQuery, ResultadoQuery, Condicao),
+    incluirFiltroQuery(StringQuery, ResultadoQuery, Condicao),
     executeSparqlQuery(ResultadoQuery, Resultado).
 
 /**
@@ -120,7 +120,7 @@ resultadoListado(QueryPredicado, Lista):-
  *   ?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00026', [DrugIdentifier, ProductName, ProductIdentifier]).
 */
 resultadoListado(QueryPredicado, Chave, Valor, Lista):-
-    includeConditionSubstring(Chave, Valor, Condicao),
+    incluirCondicaoString(Chave, Valor, Condicao),
     rowfiltroQuery(QueryPredicado, Condicao, Resultado),
     applyToRow(Resultado, Lista).
  
@@ -142,6 +142,7 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
 ?- resultadoListado(queryFoodInteraction, Lista).
 ?- resultadoListado(queryInteraction, Lista).
 ?- resultadoListado(queryProduct, Lista).
+?- resultadoListado(queryProductInteraction, Lista).
 
 ?- rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Resultado).
 ?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00945', Lista).
