@@ -93,7 +93,7 @@ resultadoFiltro(QueryPredicado, Chave, Indice, Lista):-
     Chave == Objetivo.
 
 /**
- * resultadoListado(QueryPredicado, Lista).
+ * resultadoListado(+QueryPredicado, -Lista).
  * Executa a query e retorna o resultado em uma lista.
  * Caso queira os elementos separadamente, defina cada um em uma lista
  * OBS: Verifique a quantidade de resultados de cada query
@@ -109,7 +109,7 @@ resultadoListado(QueryPredicado, Lista):-
 
 
 /**
- * resultadoListado(QueryPredicado, Chave, Valor, Lista).
+ * resultadoListado(+QueryPredicado, +Chave, +Valor, -Lista).
  * Executa a query e retorna o resultado em uma lista.
  * Caso queira os elementos separadamente, defina cada um em uma lista
  * OBS: Verifique a quantidade de resultados de cada query
