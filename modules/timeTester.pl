@@ -3,7 +3,6 @@
 :- use_module('sparqlFunctions.pl').
 :- use_module('queries.pl').
 :- use_module('rowFunctions.pl').
-:- use_module('../farmacinha.pl').
 
 
 meu_predicado(PredicateString) :-

@@ -3,7 +3,7 @@
 */
 :- use_module('modules/queries.pl').
 :- use_module('modules/sparqlFunctions.pl').
-
+:- use_module('modules/auxFunctions.pl').
 
 %
 % Nomeclaturas adotadas para simplificar nome das variáveis:
@@ -43,8 +43,7 @@
  * Inferências baseadas nas informações disponíveis
  * 
 */
-stringMesmoPrincipioAtivo(Str):-
-    Str = "Possuem mesmo principio ativo".
+
 
 %------------------------
 % Lista com IdPrimario que o produto possui (casos em que pode-se ter mais que um)
@@ -208,8 +207,6 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
     ).
 
 
-% findall( (Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB), alertaInteracaoComprados(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB), ListaArgs).
-% processar(['DB00945', 'DB00026'], ['DB00001', 'DB00005'], Descricao, interacaoProdutoSimplificada ).
 /** <examples>
 
 ?- interacaoProdutosDiferentes_v1('Enbrel 25 mg kit', CodigoA, 'Kineret 1 Box = 7 Syringes, 4.69ml Box', CodigoB, Descricao).
@@ -225,22 +222,5 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 
 */
 
-foo(X,Y,R):-
-    string_concat( X , Y, R).
-% Define a regra para percorrerLista a lista de números 1 e a lista de números 2
-processar(ListaNumeros1, ListaNumeros2, Resultado, Predicado) :-
-    percorrerLista(ListaNumeros1, ListaNumeros2, Resultado, Predicado).
 
-% Regra para percorrerLista a lista de números 1
-percorrerLista([], _, [], _).
-percorrerLista([Numero1|Resto1], ListaNumeros2, Resultado, Predicado) :-
-    percorrerLista2(Numero1, ListaNumeros2, ResultadoTemp, Predicado),
-    percorrerLista(Resto1, ListaNumeros2, RestoResultado, Predicado),
-    append(ResultadoTemp, RestoResultado, Resultado).
-
-% Regra para percorrerLista a lista de números 2
-percorrerLista2(_, [], [], _).
-percorrerLista2(Numero1, [Numero2|Resto2], [Resultado|RestoResultado], Predicado) :-
-    call(Predicado, Numero1, Numero2, Resultado),
-    percorrerLista2(Numero1, Resto2, RestoResultado, Predicado).
 
