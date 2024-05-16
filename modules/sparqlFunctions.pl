@@ -1,13 +1,6 @@
 :- module(sparqlFunctions,   [  rowResultado/2, rowfiltroQuery/3,
-                        resultadoSeparadoFiltrado/5, resultadoSeparadoFiltrado/6,
-                        resultadoSeparado/3, resultadoSeparado/4,
-                        resultadoValoresSeparados/3, resultadoValoresSeparados/4,
                         resultadoListado/2, resultadoListado/4,
                         filtroResultado/4]).
-
-/*:- use_module('modules/sparql_client.pl').
-:- use_module('modules/queries.pl').
-:- use_module('modules/rowFunctions.pl').*/
 :- use_module('sparql_client.pl').
 :- use_module('queries.pl').
 :- use_module('rowFunctions.pl').
@@ -35,53 +28,13 @@ rowfiltroQuery(QueryPredicado, Condicao, Resultado):-
     executeSparqlQuery(ResultadoQuery, Resultado).
 
 %------------------------------
-% Resultado predicados com argumentos = 2
-resultadoSeparado(QueryPredicado, A, B):-
-    rowResultado(QueryPredicado, Resultado),
-    Resultado = row(A, B).
-
-%------------------------------
-% Resultado predicados com argumentos = 3
-resultadoSeparado(QueryPredicado, A,B,C):-
-    rowResultado(QueryPredicado, Resultado),
-    Resultado = row(A, B, C).
-
-%------------------------------
-% Resultado no formato string com argumentos = 2
-resultadoValoresSeparados(QueryPredicado, A,B):-
-    rowResultado(QueryPredicado,Resultado),
-    Resultado = row(Index1, Index2),
-    extractValueFromRowElement(Index1, A),
-    extractValueFromRowElement(Index2, B).
-
-%------------------------------
-% Resultado no formato string com argumentos = 3
-resultadoValoresSeparados(QueryPredicado, A,B,C):-
-    rowResultado(QueryPredicado, Resultado),
-    Resultado = row(Valor1, Valor2, Valor3),
-    extractValueFromRowElement(Valor1, A),
-    extractValueFromRowElement(Valor2, B),
-    extractValueFromRowElement(Valor3, C).
-
-
-%------------------------------
-% Resultado filtrado na query no formato string com argumentos = 5
-resultadoSeparadoFiltrado(QueryPredicado, Chave, Valor, A,B):-
-    includeConditionSubstring(Chave, Valor, Condicao),
-    rowfiltroQuery(QueryPredicado, Condicao, Resultado),
-    Resultado = row(Index1, Index2),
-    extractValueFromRowElement(Index1, A),
-    extractValueFromRowElement(Index2, B).
-
-%------------------------------
-% Resultado filtrado na query no formato string com argumentos = 6
-resultadoSeparadoFiltrado(QueryPredicado, Chave, Valor, A,B,C):-
-    includeConditionSubstring(Chave, Valor, Condicao),
-    rowfiltroQuery(QueryPredicado, Condicao, Resultado),
-    Resultado = row(Valor1, Valor2, Valor3),
-    extractValueFromRowElement(Valor1, A),
-    extractValueFromRowElement(Valor2, B),
-    extractValueFromRowElement(Valor3, C).
+% Resultado com filtragem FORA da query
+% Chave é o valor a ser encontrado
+% Index é onde ele se encontra na lista que é resultado da query
+resultadoFiltro(QueryPredicado, Chave, Index, Lista):-
+    resultadoListado(QueryPredicado, Lista),
+    nth0(Index, Lista, Objetivo, _),
+    Chave == Objetivo.
 
 /**
  * resultadoListado(QueryPredicado, Lista).
@@ -114,13 +67,7 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
     rowfiltroQuery(QueryPredicado, Condicao, Resultado),
     applyToRow(Resultado, Lista).
  
-%------------------------------
-% Resultado filtrado por uma chave e onde 
-% ela se encontra na lista que é resultado da query
-filtroResultado(QueryPredicado, Chave, Index, Lista):-
-    resultadoListado(QueryPredicado, Lista),
-    nth0(Index, Lista, Objetivo, _),
-    Chave == Objetivo.
+
 
 /** <examples>
 
