@@ -37,9 +37,6 @@
 
 :- dynamic interacaoIdPrimario/3.
 % interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
-%:- dynamic produtoIdInteraction/5.
-% produtoIdInteraction(IdPrimario, NomeProduto, CodigoProduto, InteractionIDs, Descricao).
-
 
 /* --------------------------------
  * --------------------------------
@@ -50,7 +47,7 @@
 %------------------------
 % Lista com IdPrimario que o produto possui (casos em que pode-se ter mais que um)
 listaIdPrimarioProduto(NomeProduto, CodigoProduto, Lista):-
-    bagof(IdPrimario, resultadoValoresSeparados(queryProduct, IdPrimario, NomeProduto, CodigoProduto), Temp ),
+    bagof(IdPrimario, resultadoListado(queryProduct, [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
     sort(Temp, Lista),
     length(Lista, Tam),
     Tam > 1.
@@ -70,96 +67,75 @@ interacaoProdutosSimilares(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
  * 
 */
 interacaoProdutosDiferentes(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    resultadoValoresSeparados(queryProduct, IdPrimarioA, ProdutoA, CodigoA),
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB),
+    resultadoListado(queryProduct, [IdPrimarioA, ProdutoA, CodigoA]),
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
     resultadoValoresSeparados(queryInteraction, IdPrimarioA, InteractionIDs, Descricao),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 % Interacao com produtos especificos!!!!!
 interacaoProdutosDiferentes_A_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    resultadoSeparadoFiltrado(queryProduct, "?productName", ProdutoA, IdPrimarioA, ProdutoA, CodigoA),
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB),
+    resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]),
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
+    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA),
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoB, IdPrimarioB, ProdutoB, CodigoB),
+    resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]),
+    resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
+    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 
 %  Uso de dynamic para acelerar a verificação das queries
 interacaoProdutosDiferentes_A_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
+    resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
     ),
 
     (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),
 
     IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
+    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
+    resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
     ),
 
     (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoB, IdPrimarioB, ProdutoB, CodigoB), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+    resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),
 
     IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
+    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 
 % TODO: Problema, leia README
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _)  ;
-        resultadoListado(queryProductInteraction, '?productName', ProdutoA, ListaInf),
-        ListaInf = [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ],
+        resultadoListado(queryProductInteraction, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
         assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)),
         assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
     ),
     (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
-    ),
-    IdPrimarioA \== IdPrimarioB,
-    sub_string(InteractionIDs, _, _, _, IdPrimarioB),
-    distinct([ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao], (  produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA),
-                    interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao), 
-                    produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB)) ).
-/*
-(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)  ;
-        resultadoListado(queryProductInteraction, '?productName', ProdutoA, ListaInf),
-        ListaInf = [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ],
-        assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)),
-        assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
-    ),
-    (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),
     IdPrimarioA \== IdPrimarioB,
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
-*/
-% [DrugIdentifier, ProductName, ProductIdentifier, InteractionIDs, InteractionDescription]
 
 retractDynamic():-
     retractall(produtoIdPrimario(_, _, _)),
     retractall(interacaoIdPrimario(_, _, _)).
 
-% interacaoProdutosDiferentes_Especificos_dynamic_v1('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09',Produto, Codigo, Descricao).
-% interacaoProdutosDiferentes_Especificos_dynamic_v2('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09',Produto, Codigo, Descricao).
-% interacaoProdutosDiferentes_Especificos_dynamic_v3('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09',Produto, Codigo, Descricao).
-% interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09',Produto, Codigo, Descricao).
+
 /*------------------------
  *------------------------
  * Simulação da farmacinha
@@ -206,7 +182,9 @@ medicamentoEmUso("José","Aspirin", "0498-0114", "US").
 
 interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
 
+interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+
 interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, 'DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.').
-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, Des).
+
 
 */

@@ -113,7 +113,7 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
     includeConditionSubstring(Chave, Valor, Condicao),
     rowfiltroQuery(QueryPredicado, Condicao, Resultado),
     applyToRow(Resultado, Lista).
-
+ 
 %------------------------------
 % Resultado filtrado por uma chave e onde 
 % ela se encontra na lista que é resultado da query
