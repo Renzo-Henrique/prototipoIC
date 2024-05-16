@@ -16,16 +16,17 @@ queryInteraction                ,DrugIdentifier, InteractionIDs, Description
 
 queryProduct                    ,DrugIdentifier, ProductName, ProductIdentifier
 
+queryProductInteraction         ,DrugIdentifier, ProductName, ProductIdentifier, InteractionIDs, InteractionDescription
+
 */
 
 /*
 TODO: perguntas
 
-?- filtro(queryDrugCategory, 'DB00001', 0, List).
-List = ['DB00001', 'Antithrombins'] ;
-List = ['DB00001', 'Fibrinolytic Agents'] ;
-false.
+Utilização de assert diminui pesquisas com backtracking, mas é viável? Pode travar?
 
-Isso deve ser consertado? Não retornar falso quando não achar mais resultados
+Unificar queries que são usadas juntas pra diminuir custo da pesquisa: queryInteraction e queryProduct resultando em queryProductInteraction.
+Custa mais memória, mas é mais rápida
+
 
 */

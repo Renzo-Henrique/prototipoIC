@@ -3,7 +3,8 @@
 :- module(queries,   [  includeFilterQuery/3, includeConditionSubstring/3,
                         queryDrugCategory/1, queryDrugClassification/1,
                         queryDrugInformation/1, queryFoodInteraction/1,
-                        queryInteraction/1, queryProduct/1]).
+                        queryInteraction/1, queryProduct/1,
+                        queryProductInteraction/1]).
 
 queryDrugCategory(Query):- 
         Query ="
@@ -16,7 +17,7 @@ queryDrugCategory(Query):-
                 biovoc:identifier ?drugIdentifier;
                 dbvoc:category/dcterms:title ?drugCategory.
 
-        } ORDER BY ?drugIdentifier LIMIT 1000 ".
+        } ORDER BY ?drugIdentifier ".
             
 queryDrugClassification(Query):- 
         Query ="
@@ -30,7 +31,7 @@ queryDrugClassification(Query):-
                 biovoc:identifier ?drugIdentifier;
                 dbvoc:drug-classification-category/dcterms:title ?drugClassification.
 
-        } ORDER BY ?drugIdentifier LIMIT 1000".
+        } ORDER BY ?drugIdentifier".
 
 queryDrugInformation(Query):-
         Query =  "
@@ -58,7 +59,7 @@ queryFoodInteraction(Query):-
         ?sub a dbvoc:Drug ;
                 biovoc:identifier ?drugIdentifier;
                 dbvoc:food-interaction/rdf:value ?foodInteraction.
-        } ORDER BY ?drugIdentifier LIMIT 1000".
+        } ORDER BY ?drugIdentifier".
 
 queryInteraction(Query):- 
         Query ="
@@ -75,8 +76,7 @@ queryInteraction(Query):-
         
         ?interactionLink dcterms:title ?interactionDescription;
                 biovoc:identifier ?interactionIDs.
-        {}
-        } ORDER BY ?drugIdentifier LIMIT 1000".
+        } ORDER BY ?drugIdentifier".
 
 queryProduct(Query):- 
         Query ="
@@ -93,7 +93,27 @@ queryProduct(Query):-
         ?productLink dcterms:title ?productName;
                 biovoc:identifier ?productIdentifier
         
-        } ORDER BY ?drugIdentifier LIMIT 1000".
+        } ORDER BY ?drugIdentifier".
+
+queryProductInteraction(Query):- 
+        Query ="
+        PREFIX biovoc: <http://bio2rdf.org/bio2rdf_vocabulary:>
+        PREFIX dbvoc: <http://bio2rdf.org/drugbank_vocabulary:>
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+
+        SELECT distinct  ?drugIdentifier ?productName ?productIdentifier ?interactionIDs  ?interactionDescription
+        WHERE {
+        ?d1 a dbvoc:Drug;
+                dbvoc:ddi-interactor-in ?interactionLink;
+                biovoc:identifier ?drugIdentifier;
+                dbvoc:product ?productLink.
+
+        ?interactionLink dcterms:title ?interactionDescription;
+        biovoc:identifier ?interactionIDs.
+        ?productLink dcterms:title ?productName;
+                biovoc:identifier ?productIdentifier
+     	
+        } ORDER BY ?drugIdentifier".
 
 % Predicate to include a condition to filter in a query
 % Condition must be able match the argument Query
@@ -143,6 +163,7 @@ includeFilter(Condition, Filter) :-
         string_concat(" FILTER(", Condition, Temp),
         string_concat(Temp, ")\n", Filter).
 
+% Include key and value into a verifier of Substring in sparql
 includeConditionSubstring(Key, Value, Condition):-
         string_concat(" CONTAINS(", Key, Temp1),
         string_concat(Temp1, ", \'", Temp2),
@@ -150,6 +171,11 @@ includeConditionSubstring(Key, Value, Condition):-
         string_concat(Temp3, "\') ", Condition).
 
 
-% " CONTAINS(?interactionIDs, '\'DB00026\'') "
+
 
 % includeConditionSubstring("?interactionIDs", 'DB00026', Condition).
+
+/** <examples>
+
+?- includeConditionSubstring("?interactionIDs", 'DB00026', Condition).
+*/
