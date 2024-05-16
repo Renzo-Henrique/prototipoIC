@@ -1,6 +1,6 @@
 :- module(sparqlFunctions,   [  rowResultado/2, rowfiltroQuery/3,
-                        resultadoListado/2, resultadoListado/4,
-                        filtroResultado/4]).
+                                resultadoListado/2, resultadoListado/4,
+                                resultadoFiltro/4]).
 :- use_module('sparql_client.pl').
 :- use_module('queries.pl').
 :- use_module('rowFunctions.pl').

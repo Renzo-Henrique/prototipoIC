@@ -15,17 +15,17 @@
 %
 % Predicados que podem ser usados frequentemente
 % ------------------------------------------
-% resultadoValoresSeparados(queryDrugCategory,IdPrimario, DrugCategory)
+% resultadoListado(queryDrugCategory,[IdPrimario, DrugCategory])
 % 
-% resultadoValoresSeparados(queryDrugClassification,IdPrimario, DrugClassification)
+% resultadoListado(queryDrugClassification,[IdPrimario, DrugClassification])
 % 
-% resultadoValoresSeparados(queryDrugInformation,IdPrimario, ActivePrinciple, Indication)
+% resultadoListado(queryDrugInformation,[IdPrimario, ActivePrinciple, Indication])
 % 
-% resultadoValoresSeparados(queryFoodInteraction,IdPrimario, FoodInteraction)
+% resultadoListado(queryFoodInteraction,[IdPrimario, FoodInteraction])
 % 
-% resultadoValoresSeparados(queryInteraction,IdPrimario, InteractionIDs, Description)
+% resultadoListado(queryInteraction,[IdPrimario, InteractionIDs, Description])
 % 
-% resultadoValoresSeparados(queryProduct,IdPrimario, ProductName, ProductIdentifier)
+% resultadoListado(queryProduct,[IdPrimario, ProductName, ProductIdentifier])
 %
 %
 
@@ -43,34 +43,41 @@
  * Inferências baseadas nas informações disponíveis
  * 
 */
+stringMesmoPrincipioAtivo(Str):-
+    Str = "Possuem mesmo principio ativo".
 
 %------------------------
 % Lista com IdPrimario que o produto possui (casos em que pode-se ter mais que um)
 listaIdPrimarioProduto(NomeProduto, CodigoProduto, Lista):-
     bagof(IdPrimario, resultadoListado(queryProduct, [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
-    sort(Temp, Lista),
-    length(Lista, Tam),
-    Tam > 1.
+    sort(Temp, Lista).
+    %length(Lista, Tam),
+    %Tam > 1.
 
 
 /*------------------------
  * Informações para saber sobre interações entre produtos com princípios ativos IGUAIS
  * 
 */
-interacaoProdutosSimilares(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    listaIdPrimarioProduto(ProdutoA, CodigoA, ListaA),
-    listaIdPrimarioProduto(ProdutoB, CodigoB, ListaB),
-    ListaA == ListaB, Descricao = "Possuem mesmo principio ativo".
+interacaoProdutosSimilares( ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
+    listaIdPrimarioProduto(ProdutoA, CodigoA, ListaIdA),
+    listaIdPrimarioProduto(ProdutoB, CodigoB, ListaIdB),
+    ListaIdA == ListaIdB, stringMesmoPrincipioAtivo(Descricao).
 
 /*------------------------
  * Informações para saber sobre interações entre produtos com princípios ativos DIFERENTES
- * 
+ *  
 */
+interacaoProdutoSimplificada(IdPrimarioA, IdPrimarioB, Descricao):-
+    IdPrimarioA \== IdPrimarioB,
+    resultadoListado(queryInteraction, [IdPrimarioA, InteractionIDs, Descricao]),
+    sub_string(InteractionIDs, _, _, _, IdPrimarioB).
+
 interacaoProdutosDiferentes(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     resultadoListado(queryProduct, [IdPrimarioA, ProdutoA, CodigoA]),
     resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
-    resultadoValoresSeparados(queryInteraction, IdPrimarioA, InteractionIDs, Descricao),
+    resultadoListado(queryInteraction, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 % Interacao com produtos especificos!!!!!
@@ -112,13 +119,12 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
     (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
     resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),
-
-    IdPrimarioA \== IdPrimarioB,
+    IdPrimarioA \== IdPrimarioB, 
     resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 
-% TODO: Problema, leia README
+% TODO: Problema, Ao usar assert em interactionID está tendo muitas cópias de resultados
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _)  ;
         resultadoListado(queryProductInteraction, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
@@ -153,9 +159,10 @@ elementos_internos([H|T], X, Y, Z) :-
 % ---------------
 % Nota-se que receita é algo mais complexo
 % ---------------
-receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Consumir de 8 em 8 horas"],
+receita("José",[['Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', "Consumir de 8 em 8 horas"],
                 ["Teste simples", "Codigo", "Ingerir com água"],
-                ["Refludan 50 mg vial", "172d9ce8065ac96f019189b12bde6767", "--"]
+                ['Evite atividades intensas'],
+                ['Refludan 50 mg vial', '172d9ce8065ac96f019189b12bde6767', "--"]
                 ] ).
 
 % Medicamento específico para paciente
@@ -169,22 +176,71 @@ receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
  * Em uso
  * medicamentoEmUso(Paciente, Produto,CodigoProduto).
 */
-medicamentoEmUso("João","Refludan", "02240996", "Canada").
-medicamentoEmUso("João","Aspirin", "0498-0114", "US").
+medicamentoComprado("José",'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9').
+medicamentoComprado("Maria", 'Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container', '062c64e7cdc2435ce743297119614312').
+medicamentoComprado("Maria", 'Lufyllin-GG 200-200 mg tablet', '3b316e3524ae739666b2c595ece5d0f8').
 
-medicamentoEmUso("José","Aspirin", "0498-0114", "US").
+alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB):-
+    CodigoA \== CodigoB,
+    medicamentoComprado(Paciente, ProdutoA, CodigoA),
+    medicamentoComprado(Paciente, ProdutoB, CodigoB),
+    listaIdPrimarioProduto(ProdutoA, CodigoA, ListaA),
+    listaIdPrimarioProduto(ProdutoB, CodigoB, ListaB),
+    (
+        % Produtos iguais
+        ListaA == ListaB, stringMesmoPrincipioAtivo(Descricao) ;
+
+        % Necessário callback para cada elemento da lista
+        processar(ListaA, ListaB, Descricao, interacaoProdutoSimplificada)
+    ).
+alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB):-
+    CodigoA \== CodigoB,
+    receitaMedicamento(Paciente, ProdutoA, CodigoA, _),
+    medicamentoComprado(Paciente, ProdutoB, CodigoB),
+    listaIdPrimarioProduto(ProdutoA, CodigoA, ListaA),
+    listaIdPrimarioProduto(ProdutoB, CodigoB, ListaB),
+    (
+        % Produtos iguais
+        ListaA == ListaB, stringMesmoPrincipioAtivo(Descricao) ;
+
+        % Necessário callback para cada elemento da lista
+        processar(ListaA, ListaB, Descricao, interacaoProdutoSimplificada)
+    ).
 
 
+% findall( (Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB), alertaInteracaoComprados(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB), ListaArgs).
+% processar(['DB00945', 'DB00026'], ['DB00001', 'DB00005'], Descricao, interacaoProdutoSimplificada ).
 /** <examples>
 
 ?- interacaoProdutosDiferentes_v1('Enbrel 25 mg kit', CodigoA, 'Kineret 1 Box = 7 Syringes, 4.69ml Box', CodigoB, Descricao).
 ?- interacaoProdutosDiferentes_AB_Especifico_dynamic('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
 
-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
 
-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
 
-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, 'DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.').
+?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, 'DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.').
 
+?- interacaoProdutosDiferentes('Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container', '062c64e7cdc2435ce743297119614312', 'Lufyllin-GG 200-200 mg tablet', '3b316e3524ae739666b2c595ece5d0f8', Descricao).
 
 */
+
+foo(X,Y,R):-
+    string_concat( X , Y, R).
+% Define a regra para percorrerLista a lista de números 1 e a lista de números 2
+processar(ListaNumeros1, ListaNumeros2, Resultado, Predicado) :-
+    percorrerLista(ListaNumeros1, ListaNumeros2, Resultado, Predicado).
+
+% Regra para percorrerLista a lista de números 1
+percorrerLista([], _, [], _).
+percorrerLista([Numero1|Resto1], ListaNumeros2, Resultado, Predicado) :-
+    percorrerLista2(Numero1, ListaNumeros2, ResultadoTemp, Predicado),
+    percorrerLista(Resto1, ListaNumeros2, RestoResultado, Predicado),
+    append(ResultadoTemp, RestoResultado, Resultado).
+
+% Regra para percorrerLista a lista de números 2
+percorrerLista2(_, [], [], _).
+percorrerLista2(Numero1, [Numero2|Resto2], [Resultado|RestoResultado], Predicado) :-
+    call(Predicado, Numero1, Numero2, Resultado),
+    percorrerLista2(Numero1, Resto2, RestoResultado, Predicado).
+
