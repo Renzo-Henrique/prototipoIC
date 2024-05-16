@@ -5,7 +5,14 @@
 :- use_module('queries.pl').
 :- use_module('rowFunctions.pl').
 
-% Predicado que executa uma query de entrada.
+/**
+ * executeSparqlQuery(+QueryString, -Resultado)
+ *
+ * Predicado que executa uma query de entrada em formato de string e retorna o resultado.
+ *
+ * @param QueryString String contendo a consulta SPARQL a ser executada.
+ * @param Resultado Variável que será unificada com o resultado da consulta.
+ */
 executeSparqlQuery(QueryString, Resultado) :-
     sparql_query(   QueryString,
                     Resultado,
