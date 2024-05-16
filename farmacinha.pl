@@ -91,27 +91,9 @@ interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, 
     resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
-/*interacaoProdutosDiferentes_AB_Especifico_dynamic_v0(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
-    ),
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoB, IdPrimarioB, ProdutoB, CodigoB),
-    IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
-    sub_string(InteractionIDs, _, _, _, IdPrimarioB).*/
 
 %  Uso de dynamic para acelerar a verificação das queries
-/*interacaoProdutosDiferentes_A_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-    resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
-    ),
-    resultadoValoresSeparados(queryProduct, IdPrimarioB, ProdutoB, CodigoB),
-    IdPrimarioA \== IdPrimarioB,
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
-    sub_string(InteractionIDs, _, _, _, IdPrimarioB).*/
-
-%  Uso de dynamic para acelerar a verificação das queries
-interacaoProdutosDiferentes_A_Especifico_dynamic_v2(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
+interacaoProdutosDiferentes_A_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
     resultadoSeparadoFiltrado(queryProduct, '?productName', ProdutoA, IdPrimarioA, ProdutoA, CodigoA), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
     ),
@@ -138,13 +120,8 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
     resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
-/*
-(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao) ;
-    resultadoSeparadoFiltrado(queryInteraction, '?drugIdentifier', IdPrimarioA, IdPrimarioA, InteractionIDs, Descricao), assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
-    ),
 
-*/
-
+% TODO: Problema, leia README
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _)  ;
         resultadoListado(queryProductInteraction, '?productName', ProdutoA, ListaInf),
@@ -157,7 +134,9 @@ interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descr
     ),
     IdPrimarioA \== IdPrimarioB,
     sub_string(InteractionIDs, _, _, _, IdPrimarioB),
-    interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
+    distinct([ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao], (  produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA),
+                    interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao), 
+                    produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB)) ).
 /*
 (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)  ;
         resultadoListado(queryProductInteraction, '?productName', ProdutoA, ListaInf),
@@ -226,5 +205,8 @@ medicamentoEmUso("José","Aspirin", "0498-0114", "US").
 ?- interacaoProdutosDiferentes_AB_Especifico_dynamic('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
 
 interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+
+interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, 'DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.').
+interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, Des).
 
 */

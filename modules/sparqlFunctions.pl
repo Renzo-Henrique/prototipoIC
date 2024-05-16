@@ -82,14 +82,33 @@ resultadoSeparadoFiltrado(QueryPredicado, Chave, Valor, A,B,C):-
     extractValueFromRowElement(Valor1, A),
     extractValueFromRowElement(Valor2, B),
     extractValueFromRowElement(Valor3, C).
-%------------------------------
-% Resultado em lista
+
+/**
+ * resultadoListado(QueryPredicado, Lista).
+ * Executa a query e retorna o resultado em uma lista.
+ * Caso queira os elementos separadamente, defina cada um em uma lista
+ * OBS: Verifique a quantidade de resultados de cada query
+ *
+ * @example 
+ *   ?- resultadoListado(queryProduct, [DrugIdentifier, ProductName, ProductIdentifier]).
+ *
+*/
 resultadoListado(QueryPredicado, Lista):-
     rowResultado(QueryPredicado, Row),
     applyToRow(Row, Lista).
 
-%------------------------------
-% Resultado em lista com condicao
+
+/**
+ * resultadoListado(QueryPredicado, Chave, Valor, Lista).
+ * Executa a query e retorna o resultado em uma lista.
+ * Caso queira os elementos separadamente, defina cada um em uma lista
+ * OBS: Verifique a quantidade de resultados de cada query
+ * OBS: Chave deve ser uma variável de consulta válida
+ *
+ * @example 
+ *
+ *   ?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00026', [DrugIdentifier, ProductName, ProductIdentifier]).
+*/
 resultadoListado(QueryPredicado, Chave, Valor, Lista):-
     includeConditionSubstring(Chave, Valor, Condicao),
     rowfiltroQuery(QueryPredicado, Condicao, Resultado),

@@ -28,5 +28,7 @@ Utilização de assert diminui pesquisas com backtracking, mas é viável? Pode 
 Unificar queries que são usadas juntas pra diminuir custo da pesquisa: queryInteraction e queryProduct resultando em queryProductInteraction.
 Custa mais memória, mas é mais rápida
 
+Ao usar assert em interactionID está tendo muitas cópias de resultados
+
 
 */
