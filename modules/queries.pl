@@ -320,9 +320,9 @@ incluirFiltro(Condicao, Filtro) :-
  */
 incluirCondicaoString(Chave, Valor, Condicao):-
         string_concat(" CONTAINS(", Chave, Temp1),
-        string_concat(Temp1, ", \'", Temp2),
+        string_concat(Temp1, ", \"", Temp2),
         string_concat(Temp2, Valor, Temp3),
-        string_concat(Temp3, "\') ", Condicao).
+        string_concat(Temp3, "\") ", Condicao).
 
 
 

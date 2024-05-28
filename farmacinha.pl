@@ -1,6 +1,6 @@
-:- use_module('modules/queries.pl').
-:- use_module('modules/sparqlFunctions.pl').
-:- use_module('modules/auxFunctions.pl').
+:- use_module("modules/queries.pl").
+:- use_module("modules/sparqlFunctions.pl").
+:- use_module("modules/auxFunctions.pl").
 
 /*
 * Nomeclaturas adotadas para simplificar nome das variáveis:
@@ -120,7 +120,7 @@ interacaoProdutosDiferentes_A_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, D
     resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]),
     resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
-    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
+    resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 /**
@@ -134,10 +134,10 @@ interacaoProdutosDiferentes_A_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, D
  *
  */
 interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]),
-    resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]),
+    resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]),
+    resultadoListado(queryProduct, "?productName", ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
-    resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
+    resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
 /**
@@ -153,14 +153,15 @@ interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, 
  */
 interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (   
+        %TODO:: MUDAR OS ARGUM
         produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-        resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), 
+        resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), 
         assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
     ), % Corte para evitar backtracking caso o assert já tenha sido feito
 
     (   
         produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-        resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), 
+        resultadoListado(queryProduct, "?productName", ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), 
         assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),!, % Corte para evitar backtracking caso o assert já tenha sido feito
     IdPrimarioA \== IdPrimarioB,
@@ -169,7 +170,7 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
 
         interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao),sub_string(InteractionIDs, _, _, _, IdPrimarioA) ;
 
-        resultadoListado(queryInteraction, '?drugIdentifier', IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]), 
+        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]), 
         assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
         sub_string(InteractionIDs, _, _, _, IdPrimarioB),assert(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
     ), !.
@@ -187,7 +188,7 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
  */ %TODO: problema, vários resultados iguais por causa do assert interacaoIdPrimario
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _), !  ;
-        resultadoListado(queryProductInteraction, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
+        resultadoListado(queryProductInteraction, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
         assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)), assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
         
     ),
@@ -235,10 +236,10 @@ elementosInternos([H|T], X, Y, Z) :-
 * Nota-se que receita é algo mais complexo
 * ---------------
 */
-receita("José",[['Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', "Consumir de 8 em 8 horas"],
+receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Consumir de 8 em 8 horas"],
                 ["Teste simples", "Codigo", "Ingerir com água"],
-                ['Evite atividades intensas'],
-                ['Refludan 50 mg vial', '172d9ce8065ac96f019189b12bde6767', "--"]
+                ["Evite atividades intensas"],
+                ["Refludan 50 mg vial", "172d9ce8065ac96f019189b12bde6767", "--"]
                 ] ).
 
 % Medicamento específico para paciente
@@ -252,9 +253,9 @@ receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
  * Em uso
  * medicamentoEmUso(Paciente, Produto,CodigoProduto).
 */
-medicamentoComprado("José",'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9').
-medicamentoComprado("Maria", 'Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container', '062c64e7cdc2435ce743297119614312').
-medicamentoComprado("Maria", 'Lufyllin-GG 200-200 mg tablet', '3b316e3524ae739666b2c595ece5d0f8').
+medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9").
+medicamentoComprado("Maria", "Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312").
+medicamentoComprado("Maria", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8").
 
 /* 
 *  alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao, ListaA, ListaB)
@@ -317,18 +318,20 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 
 /** <examples>
 
-?- interacaoProdutosDiferentes_AB_Especifico_dynamic('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+?- interacaoProdutosDiferentes_AB_Especifico_dynamic("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9", Descricao).
 
-?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', P, C, Descricao).
+?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", P, C, Descricao).
 
-?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', '050312783d93f8e97fbe03456bf168c9', Descricao).
+?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9", Descricao).
 
-?-interacaoProdutos_productInteraction('Entrophen 10 650 mg Enteric-Coated Tablet','0377fffd0546225a918b5a674c1c1a09', 'Angiomax 250 mg vial', Codigo, 'DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.').
+?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", Codigo, "DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.").
 
-?- interacaoProdutosDiferentes('Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container', '062c64e7cdc2435ce743297119614312', 'Lufyllin-GG 200-200 mg tablet', '3b316e3524ae739666b2c595ece5d0f8', Descricao).
+?- interacaoProdutosDiferentes("Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8", Descricao).
 
-?- interacaoSimplificada('DB00005', 'DB00026', Descricao).
+?- interacaoSimplificada("DB00005", "DB00026", Descricao).
 */
+
+
 
 
 

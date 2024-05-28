@@ -4,8 +4,9 @@
 % Predicate to extract a value from a row result in sparql_query/3
 extractValueFromRowElement(RowElement, Value) :-
     RowElement =.. [_, Funct],
-    (Funct = type(_, Value), ! ;
-    Funct = lang(_, Value)), !.
+    (Funct = type(_, X), ! ;
+    Funct = lang(_, X)), !,
+    atom_string(X, Value).
 
 % Base case: when all arguments are iterated
 applyFuncToArgs(_, _, 0, []).
