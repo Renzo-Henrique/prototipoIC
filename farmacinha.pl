@@ -154,12 +154,14 @@ interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, 
 interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (   
         produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-        resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
-    ),!, % Corte para evitar backtracking caso o assert já tenha sido feito
+        resultadoListado(queryProduct, '?productName', ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), 
+        assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
+    ), % Corte para evitar backtracking caso o assert já tenha sido feito
 
     (   
         produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-        resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+        resultadoListado(queryProduct, '?productName', ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), 
+        assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),!, % Corte para evitar backtracking caso o assert já tenha sido feito
     IdPrimarioA \== IdPrimarioB,
     (   
