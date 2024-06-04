@@ -175,6 +175,39 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
         sub_string(InteractionIDs, _, _, _, IdPrimarioB),assert(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
     ), !.
 
+interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
+    (   
+        resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA])
+    ),
+    (   
+        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
+        stringAfterChar(InteractionIDs, '_', IdPrimarioB)
+    ),
+    (   
+        resultadoListado(queryProduct, "?drugIdentifier", IdPrimarioB, [IdPrimarioB, ProdutoB, CodigoB])
+    ),
+    Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
+
+%resultadoListado(queryProduct, "?productName", "Lufyllin", [IdPrimarioA, ProdutoA, CodigoA]).
+%   resultadoListado(queryInteraction, "?drugIdentifier", "DB00003", [IdPrimarioA, InteractionIDs,_]), getAfter(InteractionIDs, "_", IdPrimarioB).
+% resultadoListado(queryInteraction, "?drugIdentifier", "DB00005", [_, InteractionIDs, _]), getAfter(InteractionIDs, "_", IdPrimarioB).
+
+% resultadoListado(queryInteraction, "?drugIdentifier", "DB00005", [_, InteractionIDs, _]), stringAfterChar(InteractionIDs, '_', IdPrimarioB).
+interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado):-
+    (   
+        resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA])
+    ),
+
+    (   
+        resultadoListado(queryProduct, ChaveB, ValorB, [IdPrimarioB, ProdutoB, CodigoB])
+    ),
+    IdPrimarioA \== IdPrimarioB,
+    (   
+        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]), 
+        sub_string(InteractionIDs, _, _, _, IdPrimarioB)
+        
+    ),
+    Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
 
 /**
  * interacaoProdutos_productInteraction(+ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao)
@@ -329,6 +362,9 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 ?- interacaoProdutosDiferentes("Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8", Descricao).
 
 ?- interacaoSimplificada("DB00005", "DB00026", Descricao).
+
+?- interacaoProdutosDiferentes_substring("?productName", "Entrophen", "?productName","Angiomax", Descricao).
+?- interacaoProdutosDiferentes_substring("?productName", "Enbrel", Resultado).
 */
 
 
