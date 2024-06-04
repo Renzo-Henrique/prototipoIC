@@ -35,6 +35,18 @@
 :- dynamic interacaoIdPrimario/3.
 % interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
 
+retractDynamic():-
+    retractall(produtoIdPrimario(_, _, _)),
+    retractall(interacaoIdPrimario(_, _, _)).
+
+% Definindo o predicado assert_unique/1
+assertUnique(Clausula):-
+    \+ clause(Clausula, true), % Verifica se Clause não está na base de dados
+    assert(Clausula).          % Adiciona Clause se não estiver presente
+
+% assert_unique/1 deve falhar se Clause já estiver presente
+assert_unique(_) :- 
+    fail.
 /* --------------------------------
  * --------------------------------
  * Inferências baseadas nas informações disponíveis
@@ -153,16 +165,15 @@ interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, 
  */
 interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (   
-        %TODO:: MUDAR OS ARGUM
         produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
         resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), 
-        assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
+        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
     ), % Corte para evitar backtracking caso o assert já tenha sido feito
 
     (   
         produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
         resultadoListado(queryProduct, "?productName", ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), 
-        assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+        assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),!, % Corte para evitar backtracking caso o assert já tenha sido feito
     IdPrimarioA \== IdPrimarioB,
     (   
@@ -171,8 +182,8 @@ interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, C
         interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao),sub_string(InteractionIDs, _, _, _, IdPrimarioA) ;
 
         resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]), 
-        assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
-        sub_string(InteractionIDs, _, _, _, IdPrimarioB),assert(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
+        assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
+        sub_string(InteractionIDs, _, _, _, IdPrimarioB),assertUnique(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
     ), !.
 
 interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
@@ -188,11 +199,7 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
     ),
     Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
 
-%resultadoListado(queryProduct, "?productName", "Lufyllin", [IdPrimarioA, ProdutoA, CodigoA]).
-%   resultadoListado(queryInteraction, "?drugIdentifier", "DB00003", [IdPrimarioA, InteractionIDs,_]), getAfter(InteractionIDs, "_", IdPrimarioB).
-% resultadoListado(queryInteraction, "?drugIdentifier", "DB00005", [_, InteractionIDs, _]), getAfter(InteractionIDs, "_", IdPrimarioB).
 
-% resultadoListado(queryInteraction, "?drugIdentifier", "DB00005", [_, InteractionIDs, _]), stringAfterChar(InteractionIDs, '_', IdPrimarioB).
 interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado):-
     (   
         resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA])
@@ -209,6 +216,34 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado)
     ),
     Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
 
+interacaoProdutosDiferentes_substring_Dynamic(ChaveA, ValorA, Resultado):-
+    (   
+        % Como é uma pesquisa por substring é mais válido fazer direto no sparql?
+        ChaveA = "?drugIdentifier", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(IdPrimarioA, _, _, _, ValorA) ;
+        ChaveA = "?productName", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(ProdutoA, _, _, _, ValorA) ;
+        ChaveA = "?productIdentifier", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(CodigoA, _, _, _, ValorA) ;
+
+        resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA]),
+        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
+    ),
+    (   
+        interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao),interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao) ;
+
+        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
+        % Assert com IdPrimarioA
+        assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
+        stringAfterChar(InteractionIDs, '_', IdPrimarioB),
+        % Assert com IdPrimarioB
+        assertUnique(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
+    ),
+    (   
+        produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
+        resultadoListado(queryProduct, "?drugIdentifier", IdPrimarioB, [IdPrimarioB, ProdutoB, CodigoB]),
+        assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+    ),
+    IdPrimarioA \== IdPrimarioB,
+    Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
+
 /**
  * interacaoProdutos_productInteraction(+ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao)
  *
@@ -222,18 +257,16 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado)
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
     (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _), !  ;
         resultadoListado(queryProductInteraction, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
-        assert(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)), assert(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
+        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)), assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
         
     ),
     (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]), assert(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]), assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
     ),
     IdPrimarioA \== IdPrimarioB,
     sub_string(InteractionIDs, _, _, _, IdPrimarioB), interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
 
-retractDynamic():-
-    retractall(produtoIdPrimario(_, _, _)),
-    retractall(interacaoIdPrimario(_, _, _)).
+
 
 
 /*------------------------

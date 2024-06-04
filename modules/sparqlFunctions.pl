@@ -5,6 +5,82 @@
 :- use_module('queries.pl').
 :- use_module('rowFunctions.pl').
 
+% Módulo de testes
+:- use_module(library(plunit)).
+
+
+:- begin_tests(sparqlFunctionsQueries).
+
+test(testeDrugCategory) :-
+    resultadoListado(queryDrugCategory, Lista),
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeDrugClassification) :-
+    resultadoListado(queryDrugClassification, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeDrugInformation) :-
+    resultadoListado(queryDrugInformation, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeFoodInteraction) :-
+    resultadoListado(queryFoodInteraction, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeInteraction) :-
+    resultadoListado(queryInteraction, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeProduct) :-
+    resultadoListado(queryProduct, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+test(testeProductInteraction) :-
+    resultadoListado(queryProductInteraction, Lista), 
+    length(Lista, Tam),
+    assertion(Tam > 0), !.
+
+:- end_tests(sparqlFunctionsQueries).
+
+:- begin_tests(sparqlFunctionsTests).
+
+%%%%%%%%%%%%%
+% Testes dependentes da saída da query:
+
+test(testPredicado1) :-
+    rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, \"DB00026\") ", Resultado),
+    assertion(Resultado = row(literal(type('http://www.w3.org/2001/XMLSchema#string', 'DB00005')), literal(type('http://www.w3.org/2001/XMLSchema#string', 'DB00005_DB00026')), literal(lang(en, 'DDI between Etanercept and Anakinra - Anti-TNF Agents may enhance the adverse/toxic effect of Anakinra. An increased risk of serious infection during concomitant use has been reported.')))),
+    !.
+test(testPredicado2) :-
+    resultadoListado(queryProduct, "?drugIdentifier", "DB00945", Lista),
+    assertion(Lista = ["DB00945", "Entrophen 10 650 mg Enteric-Coated Tablet", "0377fffd0546225a918b5a674c1c1a09"]),
+    !.
+
+test(testPredicado3) :-
+    resultadoFiltro(queryProduct, "DB00945", 0, Lista),
+    assertion(Lista = ["DB00945", "Entrophen 10 650 mg Enteric-Coated Tablet", "0377fffd0546225a918b5a674c1c1a09"]),
+    !.
+
+:- end_tests(sparqlFunctionsTests).
+
+runSparqlFunctionsTodosTestes:-
+    runSparqlFunctionsPredicadosTestes,
+    runSparqlFunctionsQueriesTestes.
+
+runSparqlFunctionsPredicadosTestes:-
+    run_tests(sparqlFunctionsTests).
+
+runSparqlFunctionsQueriesTestes:-
+    run_tests(sparqlFunctionsQueries).
+
+
+
 /**
  * executeSparqlQuery(+QueryString, -Resultado)
  *
@@ -55,9 +131,9 @@ rowResultado(QueryPredicado, Resultado):-
  * @param Resultado Variável que será unificada com o resultado da consulta SPARQL.
  *
  * 
- * @example  Condicao = 'CONTAINS(?productNameA,\"Angiomax 250 mg vial\")'
- * @example  Condicao = 'CONTAINS(?drugIdentifier,\"DB00006\")'
- * @example  rowfiltroQuery(queryDrugInformation, 'CONTAINS(?drugIdentifier,\"DB00006\")', Resultado)
+ * @example  Condicao = "CONTAINS(?productNameA,\"Angiomax 250 mg vial\")"
+ * @example  Condicao = "CONTAINS(?drugIdentifier,\"DB00006\")"
+ * @example  rowfiltroQuery(queryDrugInformation, "CONTAINS(?drugIdentifier,\"DB00006\")", Resultado)
  * 
  * 
  * @formato O resultado é uma estrutura complexa contendo informações obtidas pela consulta SPARQL. Resultado = row(A,B,C, ...) 
@@ -80,7 +156,7 @@ rowfiltroQuery(QueryPredicado, Condicao, Resultado):-
  * @param Indice é o índice em que a chave se encontra no resultado de uma query.
  * @param Resultado Variável que será unificada com o resultado da consulta SPARQL.
  * 
- * @note Para saber qual o índice a ser usado em uma chave verifique as variáveis de consulta da query em sparql, exemplo, '?drugIdentifier'
+ * @note Para saber qual o índice a ser usado em uma chave verifique as variáveis de consulta da query em sparql, exemplo, "?drugIdentifier"
  * 
  * @example  resultadoFiltro(queryDrugInformation, "DB00006", 0, Lista)
  * 
@@ -117,7 +193,7 @@ resultadoListado(QueryPredicado, Lista):-
  *
  * @example 
  *
- *   ?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00026', [DrugIdentifier, ProductName, ProductIdentifier]).
+ *   ?- resultadoListado(queryProduct, "?drugIdentifier", "DB00026", [DrugIdentifier, ProductName, ProductIdentifier]).
 */
 resultadoListado(QueryPredicado, Chave, Valor, Lista):-
     incluirCondicaoString(Chave, Valor, Condicao),
@@ -129,14 +205,6 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
 
 /** <examples>
 
-?- filtro(queryDrugCategory, 'DB00001', 0, List).
-
-?- resultadoValoresSeparados(queryFoodInteraction, DrugIdentifier, FoodInteraction).
-?- resultadoValoresSeparados(queryInteraction, DrugIdentifier, InteractionIDs, Description).
-
-?- resultadoSeparado(queryFoodInteraction, DrugIdentifier, FoodInteraction).
-?- resultadoSeparado(queryInteraction,DrugIdentifier, InteractionIDs, Description).
-
 ?- resultadoListado(queryDrugCategory, Lista).
 ?- resultadoListado(queryDrugClassification, Lista).
 ?- resultadoListado(queryDrugInformation, Lista).
@@ -145,6 +213,6 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
 ?- resultadoListado(queryProduct, Lista).
 ?- resultadoListado(queryProductInteraction, Lista).
 
-?- rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, 'DB00026') ", Resultado).
-?- resultadoListado(queryProduct, '?drugIdentifier', 'DB00945', Lista).
+?- rowfiltroQuery(queryInteraction, " CONTAINS(?interactionIDs, "DB00026") ", Resultado).
+?- resultadoListado(queryProduct, "?drugIdentifier", "DB00945", Lista).
 */

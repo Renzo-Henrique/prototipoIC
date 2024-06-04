@@ -30,6 +30,6 @@ queryProductInteraction         ,DrugIdentifier, ProductName, ProductIdentifier,
 
 # Algumas dúvidas atuais referente ao código
 
-Utilização de assert diminui pesquisas, mas é viável? Pode travar?
+interacaoProdutosDiferentes_substring_Dynamic/3
+        % Como é uma pesquisa por substring é mais válido fazer direto no sparql do que tentar dar match com assert?
 
-Unificar queries que são usadas juntas pra diminuir custo da pesquisa é válido? E.g. queryInteraction e queryProduct resultando em queryProductInteraction.
