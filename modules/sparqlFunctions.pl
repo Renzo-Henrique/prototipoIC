@@ -14,37 +14,37 @@
 test(testeDrugCategory) :-
     resultadoListado(queryDrugCategory, Lista),
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeDrugClassification) :-
     resultadoListado(queryDrugClassification, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeDrugInformation) :-
     resultadoListado(queryDrugInformation, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeFoodInteraction) :-
     resultadoListado(queryFoodInteraction, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeInteraction) :-
     resultadoListado(queryInteraction, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeProduct) :-
     resultadoListado(queryProduct, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 test(testeProductInteraction) :-
     resultadoListado(queryProductInteraction, Lista), 
     length(Lista, Tam),
-    assertion(Tam > 0), !.
+    assertion(Tam > 0), garbage_collect(), !.
 
 :- end_tests(sparqlFunctionsQueries).
 
@@ -78,7 +78,6 @@ runSparqlFunctionsPredicadosTestes:-
 
 runSparqlFunctionsQueriesTestes:-
     run_tests(sparqlFunctionsQueries).
-
 
 
 /**

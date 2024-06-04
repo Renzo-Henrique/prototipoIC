@@ -33,3 +33,4 @@ queryProductInteraction         ,DrugIdentifier, ProductName, ProductIdentifier,
 interacaoProdutosDiferentes_substring_Dynamic/3
         % Como é uma pesquisa por substring é mais válido fazer direto no sparql do que tentar dar match com assert?
 
+Inclusão de testes é uma boa? Irei incluir testes nas funções auxiliares e nas que dependem de query será um teste com o resultado de uma consulta prévia
