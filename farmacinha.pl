@@ -194,6 +194,7 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
         resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
         stringAfterChar(InteractionIDs, '_', IdPrimarioB)
     ),
+    IdPrimarioA \== IdPrimarioB,
     (   
         resultadoListado(queryProduct, "?drugIdentifier", IdPrimarioB, [IdPrimarioB, ProdutoB, CodigoB])
     ),
@@ -398,6 +399,7 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 
 ?- interacaoProdutosDiferentes_substring("?productName", "Entrophen", "?productName","Angiomax", Descricao).
 ?- interacaoProdutosDiferentes_substring("?productName", "Enbrel", Resultado).
+?- interacaoProdutosDiferentes_substring("?productIdentifier", "0377fffd0546225a", Resultado).
 */
 
 
