@@ -27,13 +27,17 @@ queryProductInteraction         ,DrugIdentifier, ProductName, ProductIdentifier,
 
 */
 
-
-# Algumas dúvidas atuais referente ao código
-
-## Predicados
-interacaoProdutosDiferentes_substring_Dynamic/3:  Como é uma pesquisa por substring é mais válido fazer direto no sparql do que tentar dar match com assert?
-
-Duvida vem do uso do assert: ele adiciona a cláusula como a última da lista de cláusulas existentes, portanto com o decorrer do tempo o uso do dynamic fica mais ineficiente do que se fizesse a pesquisa no sparql diretamente
-        
+       
 ## Testes
 Inclusão de testes é uma boa? Irei incluir testes nas funções auxiliares e nas que dependem de query será um teste com o resultado de uma consulta prévia
+
+# Novo readme:
+
+# Prototipo IC
+## Descrição
+
+## Instalação
+
+## Uso
+
+## Agradecimentos

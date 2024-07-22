@@ -379,7 +379,7 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
         ListaA == ListaB, stringMesmoPrincipioAtivo(Descricao) ;
 
         % Necessário callback para cada elemento da lista
-        processar(ListaA, ListaB, Descricao, interacaoProdutoSimplificada)
+        processar(ListaA, ListaB, Descricao, interacaoSimplificada)
     ).
 
 
@@ -400,6 +400,10 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 ?- interacaoProdutosDiferentes_substring("?productName", "Entrophen", "?productName","Angiomax", Descricao).
 ?- interacaoProdutosDiferentes_substring("?productName", "Enbrel", Resultado).
 ?- interacaoProdutosDiferentes_substring("?productIdentifier", "0377fffd0546225a", Resultado).
+
+?- alertaInteracaoFarmacinha("Maria", ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB).
+
+?- alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB).
 */
 
 
