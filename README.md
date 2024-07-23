@@ -11,6 +11,7 @@ Esse protótipo é apenas um Backend feito para verificar interações entre med
 * `queries.pl` são predicados que auxiliam em modificações dentro das queries além de queries prontas, definidas no próximo tópico
 * `sparql_client_.pl` é a biblioteca padrão sparql_client.pl -- SPARQL client library, mas modificada para aceitar qualquer certificado dos sites consultados pelo sparql, apenas incluido: url_option(cert_verify_hook(cert_accept_any)) ao invés de url_option(cert_verify_hook). OBS: Utilizado somente para fazer a consulta no endpoint mencionado
 * `sparqlFunctions.pl` são predicados que facilitam as chamadas das consultas em sparql e manipulação de resultados
+* `tester.pl` é um arquivo contendo módulos de teste para garantir versionamento do projeto
 
 ## Instalação
 ### Instalação do swi-prolog
