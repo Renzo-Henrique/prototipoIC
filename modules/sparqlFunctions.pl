@@ -200,8 +200,6 @@ resultadoListado(QueryPredicado, Chave, Valor, Lista):-
     applyToRow(Resultado, Lista).
  
 
-% incluirCondicaoString("?productName", "Entrophen", Condicao), rowfiltroQuery(queryProduct, Condicao, Resultado).
-
 /** <examples>
 
 ?- resultadoListado(queryDrugCategory, Lista).

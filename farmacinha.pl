@@ -1,7 +1,7 @@
 :- use_module("modules/queries.pl").
 :- use_module("modules/sparqlFunctions.pl").
 :- use_module("modules/auxFunctions.pl").
-
+:- use_module(library(pldoc)).
 
 /*
 * Predicados que podem ser usados frequentemente
@@ -233,7 +233,7 @@ receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
     elementosInternos(ListaMedicamentos, NomeProduto, CodigoProduto, Posologia).
 
 /*
-* medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9")
+* medicamentoComprado(Paciente,NomeProduto, CodigoProduto)
 *
 * Medicamento que uma pessoa comprou e possui na "farmacinha"
 * @param Paciente O Nome do paciente
@@ -273,7 +273,7 @@ alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descri
     ).
 
 /* 
-*  alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao, ListaA, ListaB)
+*  alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao, ListaA, ListaB)
 *
 * Predicado que verifica interações entre medicamento comprado e um receitado de tal paciente
 * 
