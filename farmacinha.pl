@@ -2,12 +2,6 @@
 :- use_module("modules/sparqlFunctions.pl").
 :- use_module("modules/auxFunctions.pl").
 
-/*
-* Nomeclaturas adotadas para simplificar nome das variáveis:
-* ------------------------------------------
-* IdPrimario significa Id do princípio ativo 
-*
-*/
 
 /*
 * Predicados que podem ser usados frequentemente
@@ -26,27 +20,7 @@
 *
 */
 
-% Predicados dinâmicos que auxiliam consultas verificadas frequentemente
-% TODO:: Usar com cuidado
 
-:- dynamic produtoIdPrimario/3.
-% produtoIdPrimario(IdPrimario, NomeProduto, CodigoProduto ).
-
-:- dynamic interacaoIdPrimario/3.
-% interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
-
-retractDynamic():-
-    retractall(produtoIdPrimario(_, _, _)),
-    retractall(interacaoIdPrimario(_, _, _)).
-
-% Definindo o predicado assert_unique/1
-assertUnique(Clausula):-
-    \+ clause(Clausula, true), % Verifica se Clause não está na base de dados
-    assert(Clausula).          % Adiciona Clause se não estiver presente
-
-% assert_unique/1 deve falhar se Clause já estiver presente
-assert_unique(_) :- 
-    fail.
 /* --------------------------------
  * --------------------------------
  * Inferências baseadas nas informações disponíveis
@@ -67,9 +41,8 @@ assert_unique(_) :-
  * @note Caso o produto não possua identificadores primários associados, a Lista será unificada com uma lista vazia.
  */
 listaIdPrimarioProduto(NomeProduto, CodigoProduto, Lista):-
-    bagof(IdPrimario, resultadoListado(queryProduct, [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
+    bagof(IdPrimario, resultadoListado(queryProduct, "?productIdentifier", CodigoProduto,  [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
     sort(Temp, Lista).
-
 
 
 /**
@@ -152,40 +125,17 @@ interacaoProdutosDiferentes_AB_Especifico(ProdutoA, CodigoA, ProdutoB, CodigoB, 
     resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
     sub_string(InteractionIDs, _, _, _, IdPrimarioB).
 
+
 /**
- * interacaoProdutosDiferentes_AB_Especifico(+ProdutoA, CodigoA, +ProdutoB, CodigoB, -Descricao)
+ * interacaoProdutosDiferentes__substring(+ChaveA, +ValorA, -Resultado)
  *
  * Predicado que verifica a descrição da interação entre diferentes produtos
  *
- * @param Produto_ O nome do produto para o qual deseja-se obter os identificadores primários.
- * @param Codigo_ O código do produto para o qual deseja-se obter os identificadores primários.
- * @param Descricao É a descrição da interação entre os princípios ativos dos produtos
+ * @param Chave_ O nome da variável de consulta utilizada para pesquisa
+ * @param Valor_ Valor que precisa ser encontrado na variável de consulta
+ * @param Resultado é o resultado da busca
  *
- * @note Utiliza dynamic para facilitar pesquisas futuras
  */
-interacaoProdutosDiferentes_AB_Especifico_dynamic(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    (   
-        produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA) ;
-        resultadoListado(queryProduct, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA]), 
-        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
-    ), % Corte para evitar backtracking caso o assert já tenha sido feito
-
-    (   
-        produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-        resultadoListado(queryProduct, "?productName", ProdutoB, [IdPrimarioB, ProdutoB, CodigoB]), 
-        assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
-    ),!, % Corte para evitar backtracking caso o assert já tenha sido feito
-    IdPrimarioA \== IdPrimarioB,
-    (   
-        interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao),sub_string(InteractionIDs, _, _, _, IdPrimarioB) ;
-
-        interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao),sub_string(InteractionIDs, _, _, _, IdPrimarioA) ;
-
-        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]), 
-        assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
-        sub_string(InteractionIDs, _, _, _, IdPrimarioB),assertUnique(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
-    ), !.
-
 interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
     (   
         resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA])
@@ -200,7 +150,16 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, Resultado):-
     ),
     Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
 
-
+/**
+ * interacaoProdutosDiferentes__substring(+ChaveA, +ValorA, +ChaveB, +ValorB, -Resultado)
+ *
+ * Predicado que verifica a descrição da interação entre diferentes produtos
+ *
+ * @param Chave_ O nome da variável de consulta utilizada para pesquisa
+ * @param Valor_ Valor que precisa ser encontrado na variável de consulta
+ * @param Resultado é o resultado da busca
+ *
+ */
 interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado):-
     (   
         resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA])
@@ -217,34 +176,6 @@ interacaoProdutosDiferentes_substring(ChaveA, ValorA, ChaveB, ValorB, Resultado)
     ),
     Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
 
-interacaoProdutosDiferentes_substring_Dynamic(ChaveA, ValorA, Resultado):-
-    (   
-        % Como é uma pesquisa por substring é mais válido fazer direto no sparql?
-        ChaveA = "?drugIdentifier", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(IdPrimarioA, _, _, _, ValorA) ;
-        ChaveA = "?productName", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(ProdutoA, _, _, _, ValorA) ;
-        ChaveA = "?productIdentifier", produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), sub_string(CodigoA, _, _, _, ValorA) ;
-
-        resultadoListado(queryProduct, ChaveA, ValorA, [IdPrimarioA, ProdutoA, CodigoA]),
-        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA))
-    ),
-    (   
-        interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao),interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao) ;
-
-        resultadoListado(queryInteraction, "?drugIdentifier", IdPrimarioA, [IdPrimarioA, InteractionIDs, Descricao]),
-        % Assert com IdPrimarioA
-        assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao)),
-        stringAfterChar(InteractionIDs, '_', IdPrimarioB),
-        % Assert com IdPrimarioB
-        assertUnique(interacaoIdPrimario(IdPrimarioB, InteractionIDs, Descricao))
-    ),
-    (   
-        produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-        resultadoListado(queryProduct, "?drugIdentifier", IdPrimarioB, [IdPrimarioB, ProdutoB, CodigoB]),
-        assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
-    ),
-    IdPrimarioA \== IdPrimarioB,
-    Resultado = [[IdPrimarioA, ProdutoA, CodigoA],[IdPrimarioB, ProdutoB, CodigoB], Descricao ].
-
 /**
  * interacaoProdutos_productInteraction(+ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao)
  *
@@ -256,18 +187,11 @@ interacaoProdutosDiferentes_substring_Dynamic(ChaveA, ValorA, Resultado):-
  *
  */ %TODO: problema, vários resultados iguais por causa do assert interacaoIdPrimario
 interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao):-
-    (produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA), interacaoIdPrimario(IdPrimarioA, InteractionIDs, _), !  ;
-        resultadoListado(queryProductInteraction, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
-        assertUnique(produtoIdPrimario(IdPrimarioA, ProdutoA, CodigoA)), assertUnique(interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao))
-        
-    ),
-    (produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB) ;
-    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]), assertUnique(produtoIdPrimario(IdPrimarioB, ProdutoB, CodigoB))
-    ),
+    
+    resultadoListado(queryProductInteraction, "?productName", ProdutoA, [IdPrimarioA, ProdutoA, CodigoA, InteractionIDs, Descricao ]),
+    resultadoListado(queryProduct, [IdPrimarioB, ProdutoB, CodigoB]),
     IdPrimarioA \== IdPrimarioB,
     sub_string(InteractionIDs, _, _, _, IdPrimarioB), interacaoIdPrimario(IdPrimarioA, InteractionIDs, Descricao).
-
-
 
 
 /*------------------------
@@ -276,31 +200,17 @@ interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descr
  * 
 */
 
-/**
- * elementosInternos(+Lista, -X, -Y, -Z)
- *
- * Predicado que busca elementos internos de sublistas em uma lista.
- *
- * @param Lista A lista a ser percorrida em busca de sublistas contendo os elementos X, Y e Z.
- * @param X Variável que será unificada com o primeiro elemento das sublistas encontradas.
- * @param Y Variável que será unificada com o segundo elemento das sublistas encontradas.
- * @param Z Variável que será unificada com o terceiro elemento das sublistas encontradas.
- *
- * Este predicado é não determinístico e faz uso de backtracking.
- * @note Se uma sublista contendo os elementos X, Y e Z for encontrada, o predicado unifica as variáveis X, Y e Z e retorna true. Caso contrário, o predicado faz backtracking para encontrar outras sublistas que correspondam aos critérios.
- */
-elementosInternos([H|T], X, Y, Z) :-
-    H = [X, Y, Z] ;
-    elementosInternos(T, X, Y, Z).
 
 /*
-* Esse é o que mais se aproxima do que um médico faz
-* ListaRecomendacoes possui cada elemento sendo uma lista que possui os seguintes elementos:
-* (NomeProduto, CodigoProduto, Posologia).
-*
 * receita(Paciente, ListaMedicamentos).
+*
+* Esse predicado simula a receita de um médico, um médico coloca para um paciente uma lista 
+* contendo com cada elemento tendo as informações sobre como fazer uma medicação específica: (NomeProduto, CodigoProduto, Posologia) 
+* Logo, ListaRecomendacoes possui cada elemento sendo uma lista que possui os elementos da forma:
+* (NomeProduto, CodigoProduto, Posologia)
+*
 * ---------------
-* Nota-se que receita é algo mais complexo
+* @note Nota-se que receita é algo mais complexo e essa é uma simplificação
 * ---------------
 */
 receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Consumir de 8 em 8 horas"],
@@ -309,16 +219,26 @@ receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a9
                 ["Refludan 50 mg vial", "172d9ce8065ac96f019189b12bde6767", "--"]
                 ] ).
 
-% Medicamento específico para paciente
-% receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia ).
+/*
+* receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia )
+*
+* Obtem medicamento específico para um paciente
+* @param Paciente O Nome do paciente
+* @param NomeProduto O nome do produto relacionado ao paciente
+* @param CodigoProduto O código do produto relacionado paciente
+* @param Posologia É a descrição de como o medicamento deve ser utilizado
+*/
 receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
     receita(Paciente, ListaMedicamentos),
     elementosInternos(ListaMedicamentos, NomeProduto, CodigoProduto, Posologia).
 
-
-/*------------------------
- * Em uso
- * medicamentoEmUso(Paciente, Produto,CodigoProduto).
+/*
+* medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9")
+*
+* Medicamento que uma pessoa comprou e possui na "farmacinha"
+* @param Paciente O Nome do paciente
+* @param NomeProduto O nome do produto relacionado ao paciente
+* @param CodigoProduto O código do produto relacionado paciente
 */
 medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9").
 medicamentoComprado("Maria", "Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312").
@@ -333,12 +253,10 @@ medicamentoComprado("Maria", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae73966
 * @param Produto_ Nome do produto a ser analisado
 * @param Codigo_ Código do produto a ser analisado
 * @param Descricao É a descrição da interação entre os dois, se houver
-* @param Lista_ IdPrimarios do produto a ser analisado
+* @param Lista_ Lista de IdPrimarios do produto a ser analisado
 * 
-*
 * 
 */
-
 alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB):-
     CodigoA \== CodigoB,
     medicamentoComprado(Paciente, ProdutoA, CodigoA),
@@ -385,12 +303,8 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 
 /** <examples>
 
-?- interacaoProdutosDiferentes_AB_Especifico_dynamic("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9", Descricao).
-
 ?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", P, C, Descricao).
-
 ?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9", Descricao).
-
 ?-interacaoProdutos_productInteraction("Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Angiomax 250 mg vial", Codigo, "DDI between Bivalirudin and Acetylsalicylic acid - May enhance the anticoagulant effect of Anticoagulants.").
 
 ?- interacaoProdutosDiferentes("Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8", Descricao).
@@ -402,7 +316,6 @@ alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, Lista
 ?- interacaoProdutosDiferentes_substring("?productIdentifier", "0377fffd0546225a", Resultado).
 
 ?- alertaInteracaoFarmacinha("Maria", ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB).
-
 ?- alertaInteracao(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, Descricao, ListaA, ListaB).
 */
 
