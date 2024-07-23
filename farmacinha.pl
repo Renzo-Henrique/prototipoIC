@@ -1,4 +1,4 @@
-:- use_module("modules/queries.pl").
+aler:- use_module("modules/queries.pl").
 :- use_module("modules/sparqlFunctions.pl").
 :- use_module("modules/auxFunctions.pl").
 :- use_module(library(pldoc)).
