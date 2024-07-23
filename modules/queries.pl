@@ -5,8 +5,6 @@
                         queryInteraction/1, queryProduct/1,
                         queryProductInteraction/1]).
 
-:- use_module('auxFunctions.pl').
-
 /**
  * queryDrugCategory(-Query)
  *
