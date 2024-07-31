@@ -5,7 +5,7 @@ Esse protótipo foi produzido para o projeto PIBIC UFES 2023 e com o título Des
 Esse protótipo é apenas um Backend feito para verificar interações entre medicamentos receitados e medicamentos na farmacinha caseira. Nota-se que essas interações são validadas usando dados reais do endpoint drugbank.bio2rdf.org/sparql/. A implementação foi realizada majoritariamente em sparql e prolog, cujas funções são consultas ao endpoint para obtenção de dados e manipulação de informações obtidas, respectivamente.
 
 ### Detalhes de implementação
-* `farmacinha.pl` é o programa principal, portanto se encontra apenas predicados relacionados a interações e a 'farmacinha caseira'.
+* `farmacinha.pl` é o programa principal, portanto se encontra apenas predicados relacionados a interações entre medicamentos e a 'farmacinha caseira'.
 * `auxFunctions.pl` são predicados para modularizar outros predicados.
 * `rowFunctions.pl` são predicados que facilitam o uso do compound row, que é o compound usado para demonstrar os resultados das queries sparql
 * `queries.pl` são predicados que auxiliam em modificações dentro das queries além de queries prontas, definidas no próximo tópico
@@ -70,3 +70,7 @@ OBS: Evite uso de aspas duplas dentro da query
 ## Glossário
 ### Farmacinha Caseira
 Nome dado ao conjunto de medicamentos, receitados ou não, que uma pessoa possui na residência.
+
+
+# Erros
+Fazer a pesquisa por substring funcionar em nível de sparqlFunctions, farmacinha n deve saber como isso é implementado.

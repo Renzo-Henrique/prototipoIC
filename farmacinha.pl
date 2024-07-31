@@ -41,7 +41,7 @@
  * @note Caso o produto não possua identificadores primários associados, a Lista será unificada com uma lista vazia.
  */
 listaIdPrimarioProduto(NomeProduto, CodigoProduto, Lista):-
-    bagof(IdPrimario, resultadoListado(queryProduct, "?productIdentifier", CodigoProduto,  [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
+    bagof(IdPrimario, resultadoListado(queryProduct, "?productName", NomeProduto,  [IdPrimario, NomeProduto, CodigoProduto]), Temp ),
     sort(Temp, Lista).
 
 
@@ -213,6 +213,7 @@ interacaoProdutos_productInteraction(ProdutoA, CodigoA, ProdutoB, CodigoB, Descr
 * @note Nota-se que receita é algo mais complexo e essa é uma simplificação
 * ---------------
 */
+:-dynamic receita/2.
 receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09", "Consumir de 8 em 8 horas"],
                 ["Teste simples", "Codigo", "Ingerir com água"],
                 ["Evite atividades intensas"],
@@ -240,6 +241,7 @@ receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
 * @param NomeProduto O nome do produto relacionado ao paciente
 * @param CodigoProduto O código do produto relacionado paciente
 */
+:-dynamic medicamentoComprado/3.
 medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9").
 medicamentoComprado("Maria", "Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312").
 medicamentoComprado("Maria", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8").
