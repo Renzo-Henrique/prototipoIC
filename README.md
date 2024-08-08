@@ -72,5 +72,3 @@ OBS: Evite uso de aspas duplas dentro da query
 Nome dado ao conjunto de medicamentos, receitados ou não, que uma pessoa possui na residência.
 
 
-# Erros
-Fazer a pesquisa por substring funcionar em nível de sparqlFunctions, farmacinha n deve saber como isso é implementado.
