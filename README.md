@@ -1,5 +1,6 @@
 # Prototipo IC
-Esse protótipo foi produzido para o projeto PIBIC UFES 2023 e com o título Desenvolvimento de Sistema para Gestão de Medicações Prescritas, do EDITAL FAPES Nº 09/2023 - PIBICES 2023
+Esse protótipo foi produzido para o projeto PIBIC UFES 2023 e com o título Desenvolvimento de Sistema para Gestão de Medicações Prescritas, do EDITAL FAPES Nº 09/2023 - PIBICES 2023. Ademais, o projeto em questão foi financiado pela FAPES.
+
 
 ## Descrição
 Esse protótipo é apenas um Backend feito para verificar interações entre medicamentos receitados e medicamentos na farmacinha caseira. Nota-se que essas interações são validadas usando dados reais do endpoint drugbank.bio2rdf.org/sparql/. A implementação foi realizada majoritariamente em sparql e prolog, cujas funções são consultas ao endpoint para obtenção de dados e manipulação de informações obtidas, respectivamente.
