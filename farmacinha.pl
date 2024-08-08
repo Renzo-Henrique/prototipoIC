@@ -219,6 +219,7 @@ receita("José",[["Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a9
                 ["Evite atividades intensas"],
                 ["Refludan 50 mg vial", "172d9ce8065ac96f019189b12bde6767", "--"]
                 ] ).
+receita("Maria",[["Novolin Ge Toronto 100 unit/ml","e75fb9a1eaaa9647243972481e6309e3", "Consumir de 8 em 8 horas"]] ).
 
 /*
 * receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia )
@@ -243,9 +244,9 @@ receitaMedicamento(Paciente, NomeProduto, CodigoProduto, Posologia):-
 */
 :-dynamic medicamentoComprado/3.
 medicamentoComprado("José","Angiomax 250 mg vial", "050312783d93f8e97fbe03456bf168c9").
-medicamentoComprado("Maria", "Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312").
-medicamentoComprado("Maria", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8").
-
+medicamentoComprado("João", "Pulmozyme 1 mg/ml Solution 2.5ml Plastic Container", "062c64e7cdc2435ce743297119614312").
+medicamentoComprado("João", "Lufyllin-GG 200-200 mg tablet", "3b316e3524ae739666b2c595ece5d0f8").
+medicamentoComprado("Maria", "Entrophen 10 650 mg Enteric-Coated Tablet","0377fffd0546225a918b5a674c1c1a09").
 /* 
 *  alertaInteracaoFarmacinha(Paciente, ProdutoA, CodigoA, ProdutoB, CodigoB, -Descricao, ListaA, ListaB)
 *
